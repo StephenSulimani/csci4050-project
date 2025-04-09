@@ -1,10 +1,13 @@
+import { ICustomNextRequest } from "@/app/middleware/types/CustomNextRequest";
 import { connect } from "@/db/connection";
 import Order from "@/db/models/Order";
+import User from "@/db/models/User";
 import { NextResponse } from "next/server";
 import { UniqueConstraintError } from "sequelize";
 
-export const POST = async (req: Request) => {
+export const POST = async (req: ICustomNextRequest) => {
     const body = await req.json();
+    const user_id = req.userId;
 
     const { ticker, amount, type } = body;
 
@@ -12,8 +15,12 @@ export const POST = async (req: Request) => {
         await connect();
         const datetime = new Date().toISOString();
         const price = await getPrice(ticker);
-        const user_id = "1"; // Replace with actual user ID from authentication context
-        const startingCash = 10000; // Replace with actual starting cash from user profile
+        const user = await User.findOne({
+          where: {
+            id: user_id
+          }
+        })
+        const startingCash = user.dataValues.startingCapital; 
         const cash = await calcCash(startingCash, user_id);
         if (type === 'BUY' && cash < price * amount) {
             return NextResponse.json({

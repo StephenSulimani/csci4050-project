@@ -1,17 +1,23 @@
+import { ICustomNextRequest } from "@/app/middleware/types/CustomNextRequest";
 import { connect } from "@/db/connection";
 import Order from "@/db/models/Order";
+import User from "@/db/models/User";
 import { NextResponse } from "next/server";
 import { UniqueConstraintError } from "sequelize";
 
-export const GET = async (req: Request) => {
-    const body = await req.json();
-
-    const { user_id } = body;
+export const GET = async (req: ICustomNextRequest) => {
+    const user_id = req.userId;
+    console.log("user_id", user_id);
 
     try {
         await connect();
         
-        const startingCash = 10000; // Replace with actual starting cash from user profile
+        const user = await User.findOne({
+            where: {
+              id: user_id
+            }
+          })
+        const startingCash = user.dataValues.startingCapital; 
         const cash = await calcCash(startingCash, user_id);
         const stocks = await getStocks(user_id);
         const total_value = await getTotalValue(user_id, cash, stocks);
