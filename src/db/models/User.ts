@@ -1,18 +1,33 @@
-import { DataType } from "sequelize-typescript";
-import { sequelize } from "../connection";
+import { Table, Column, Model, PrimaryKey, DataType, Unique } from 'sequelize-typescript';
 
-const User = sequelize.define('user', {
-    id: {
+@Table
+export default class User extends Model<User> {
+    @PrimaryKey
+    @Column({
         type: DataType.UUID,
-        primaryKey: true,
-        defaultValue: DataType.UUIDV4
-    },
-    name: DataType.TEXT,
-    email: {
-        type: DataType.STRING,
-        unique: true
-    },
-    password: DataType.STRING,
-});
+        defaultValue: DataType.UUIDV4,
+    })
+    declare public id: string;
 
-export default User
+    @Column({
+        type: DataType.TEXT,
+    })
+    declare public name: string;
+
+    @Unique
+    @Column({
+        type: DataType.STRING,
+    })
+    declare public email: string;
+
+    @Column({
+        type: DataType.STRING,
+    })
+    declare public password: string;
+
+    @Column({
+        type: DataType.FLOAT,
+        defaultValue: 10000
+    })
+    declare public startingCapital: number
+}

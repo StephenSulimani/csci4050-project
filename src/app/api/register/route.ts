@@ -1,6 +1,9 @@
+import { createJWT } from "@/app/auth";
 import { connect } from "@/db/connection";
+import Order from "@/db/models/Order";
 import User from "@/db/models/User";
 import bcrypt from "bcryptjs";
+import { cookies } from "next/headers";
 import { NextResponse } from "next/server";
 import { UniqueConstraintError } from "sequelize";
 
@@ -41,11 +44,25 @@ export const POST = async (req: Request) => {
 
         const hashedPassword = await bcrypt.hash(password, 10);
 
-        await User.create({
+
+        const user = await User.create({
             email: email.toLowerCase(),
             password: hashedPassword,
             name: name,
         });
+
+        const cookieStore = await cookies();
+
+        const jwt = await createJWT({ id: user.dataValues.id })
+
+        cookieStore.set({
+            name: "token",
+            value: jwt,
+            path: "/",
+            httpOnly: true,
+            maxAge: 60 * 60 * 24 * 30
+        })
+
         return NextResponse.json({
             status: 1,
             error: 0,

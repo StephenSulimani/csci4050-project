@@ -1,31 +1,39 @@
-import { DataType } from "sequelize-typescript";
-import { sequelize } from "../connection";
+import { Table, Column, Model, PrimaryKey, Default, DataType, ForeignKey, Validate } from 'sequelize-typescript';
+import User from './User';
 
-const Order = sequelize.define('order', {
-    id: {
+@Table
+export default class Order extends Model<Order> {
+    @PrimaryKey
+    @Column({
         type: DataType.UUID,
-        primaryKey: true,
-        defaultValue: DataType.UUIDV4
-    },
-    ticker: {
-      type: DataType.TEXT,
-      validate: {
+        defaultValue: DataType.UUIDV4,
+    })
+    declare public id: string;
+
+    @Validate({
         isAlphanumeric: true,
         len: [1, 10]
-      },
-      unique: true
-    },
-    datetime: DataType.DATE,
-    price: DataType.FLOAT,
-    amount: DataType.FLOAT,
-    type: DataType.ENUM('BUY', 'SELL'),
-    user_id: {
-      type: DataType.UUID,
-      references: {
-        model: 'user',
-        key: 'id'
-      }
-    }
-});
+    })
+    @Column({
+        type: DataType.TEXT,
+    })
+    declare public ticker: string;
 
-export default Order
+    @Column(DataType.DATE)
+    declare public datetime: Date;
+
+    @Column(DataType.FLOAT)
+    declare public price: number;
+
+    @Column(DataType.FLOAT)
+    declare public amount: number;
+
+    @Column(DataType.ENUM('BUY', 'SELL'))
+    declare public type: 'BUY' | 'SELL';
+
+    @ForeignKey(() => User)
+    @Column({
+        type: DataType.UUID,
+    })
+    declare public user_id: string; // Foreign key referencing User model
+}
