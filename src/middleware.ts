@@ -1,10 +1,9 @@
-import { NextResponse } from "next/server";
-import { ICustomNextRequest } from "./middleware/types/CustomNextRequest";
+import { NextRequest, NextResponse } from "next/server";
 import { authCheck } from "./middleware/auth";
 
-const blacklistedEndpoints: string[] = []
+const blacklistedEndpoints: string[] = ['/api/login', '/api/register'];
 
-export async function middleware(req: ICustomNextRequest) {
+export async function middleware(req: NextRequest) {
     const isBlacklisted = blacklistedEndpoints.some(endpoint => req.nextUrl.pathname.startsWith(endpoint))
 
     if (isBlacklisted) {
@@ -16,6 +15,7 @@ export async function middleware(req: ICustomNextRequest) {
     if (authResponse instanceof NextResponse) {
         return authResponse;
     }
+
 
     return NextResponse.next();
 }

@@ -2,26 +2,26 @@ import { ICustomNextRequest } from "@/app/middleware/types/CustomNextRequest";
 import { connect } from "@/db/connection";
 import Order from "@/db/models/Order";
 import User from "@/db/models/User";
-import { NextResponse } from "next/server";
-import { UniqueConstraintError } from "sequelize";
+import { NextRequest, NextResponse } from "next/server";
 
-export const GET = async (req: ICustomNextRequest) => {
-    const user_id = req.userId;
-    console.log("user_id", user_id);
+export const GET = async (req: NextRequest) => {
+    const user_id = req.headers.get('x-user-id')
+
+    if (!user_id) {
+        return NextResponse.json({
+            status: 0,
+            error: 1,
+            message: "You need to be authenticated"
+        }, { status: 401 })
+    }
 
     try {
         await connect();
-        
-        const user = await User.findOne({
-            where: {
-              id: user_id
-            }
-          })
-        const startingCash = user.dataValues.startingCapital; 
-        const cash = await calcCash(startingCash, user_id);
+
+        const cash = await calcCash(user_id);
         const stocks = await getStocks(user_id);
         const total_value = await getTotalValue(user_id, cash, stocks);
-        
+
         return NextResponse.json({
             status: 1,
             error: 0,
@@ -56,13 +56,23 @@ const getPrice = async (ticker: string) => {
     }
 }
 
-const calcCash = async (startingCash: number, user_id: string) => {
+const calcCash = async (user_id: string) => {
+    const user = await User.findOne({
+        where: {
+            id: user_id
+        }
+    })
+
+    if (!user) {
+        return
+    }
+
     const orders = await Order.findAll({
         where: {
             user_id: user_id
         }
     });
-    let cash = startingCash;
+    let cash = user.dataValues.startingCapital;
     for (let order of orders) {
         order = order.dataValues;
         if (order.type === 'BUY') {

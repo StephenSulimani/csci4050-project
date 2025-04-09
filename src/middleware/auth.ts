@@ -1,10 +1,9 @@
 import { cookies } from "next/headers";
-import { NextResponse } from "next/server";
-import { verifyJWT } from "../auth";
-import { ICustomNextRequest } from "./types/CustomNextRequest";
+import { NextRequest, NextResponse } from "next/server";
+import { verifyJWT } from "@/app/auth";
 
 
-export async function authCheck(req: ICustomNextRequest) {
+export async function authCheck(req: NextRequest) {
     const cookieStore = await cookies();
 
     const token = cookieStore.get('token');
@@ -27,7 +26,14 @@ export async function authCheck(req: ICustomNextRequest) {
         }, { status: 401 })
     }
 
-    req.userId = jwtStatus.id;
+    const headers = new Headers(req.headers);
 
-    return NextResponse.next();
+    headers.set('x-user-id', jwtStatus.id);
+
+    return NextResponse.next({
+        request: {
+            headers: headers
+        }
+    })
+
 }

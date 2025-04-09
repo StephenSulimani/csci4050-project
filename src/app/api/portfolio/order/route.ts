@@ -11,17 +11,21 @@ export const POST = async (req: ICustomNextRequest) => {
 
     const { ticker, amount, type } = body;
 
+    const user_id = req.headers.get('x-user-id')
+
+    if (!user_id) {
+        return NextResponse.json({
+            status: 0,
+            error: 1,
+            message: "You need to be authenticated"
+        }, { status: 401 })
+    }
+
     try {
         await connect();
         const datetime = new Date().toISOString();
         const price = await getPrice(ticker);
-        const user = await User.findOne({
-          where: {
-            id: user_id
-          }
-        })
-        const startingCash = user.dataValues.startingCapital; 
-        const cash = await calcCash(startingCash, user_id);
+        const cash = await calcCash(user_id);
         if (type === 'BUY' && cash < price * amount) {
             return NextResponse.json({
                 status: 0,
@@ -53,7 +57,7 @@ export const POST = async (req: ICustomNextRequest) => {
             ticker,
             amount,
             type,
-            datetime, 
+            datetime,
             price,
             user_id
         });
@@ -87,13 +91,23 @@ const getPrice = async (ticker: string) => {
     }
 }
 
-const calcCash = async (startingCash: number, user_id: string) => {
+const calcCash = async (user_id: string) => {
+    const user = await User.findOne({
+        where: {
+            id: user_id
+        }
+    })
+
+    if (!user) {
+        return
+    }
+
     const orders = await Order.findAll({
         where: {
             user_id: user_id
         }
     });
-    let cash = startingCash;
+    let cash = user.dataValues.startingCapital;
     for (let order of orders) {
         order = order.dataValues;
         if (order.type === 'BUY') {
