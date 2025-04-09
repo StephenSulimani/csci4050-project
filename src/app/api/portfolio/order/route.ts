@@ -2,7 +2,6 @@ import { connect } from "@/db/connection";
 import Order from "@/db/models/Order";
 import User from "@/db/models/User";
 import { NextResponse } from "next/server";
-import { UniqueConstraintError } from "sequelize";
 
 export const POST = async (req: Request) => {
     const body = await req.json();
@@ -73,7 +72,7 @@ export const POST = async (req: Request) => {
     }
 }
 
-const getPrice = async (ticker: string) => {
+const getPrice = async (ticker: string): Promise<number> => {
     const apiKey = process.env.FINNHUB_API_KEY;
     const url = `https://finnhub.io/api/v1/quote?symbol=${ticker}&token=${apiKey}`;
     try {
@@ -82,7 +81,8 @@ const getPrice = async (ticker: string) => {
             throw new Error("Network response was not ok");
         }
         const data = await response.json();
-        return data.price;
+
+        return data.c;
     } catch (error) {
         console.error("Error fetching price:", error);
         throw new Error("Error fetching price");
