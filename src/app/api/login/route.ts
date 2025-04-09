@@ -1,5 +1,7 @@
+import { createJWT } from "@/app/auth";
 import { connect } from "@/db/connection";
 import User from "@/db/models/User";
+import bcrypt from "bcryptjs";
 import { cookies } from "next/headers";
 import { NextResponse } from "next/server";
 import { Sequelize } from "sequelize-typescript";
@@ -16,7 +18,6 @@ export const POST = async (req: Request) => {
                 email: {
                     [Sequelize.Op.iLike]: email
                 },
-                password,
             },
         });
         if (!user) {
@@ -24,13 +25,26 @@ export const POST = async (req: Request) => {
                 status: 0,
                 error: 1,
                 message: "Invalid credentials",
-            })
+            }, { status: 401 })
         }
+
+        const loginStatus = await bcrypt.compare(password, user.dataValues.password);
+
+        if (!loginStatus) {
+            return NextResponse.json({
+                status: 0,
+                error: 1,
+                message: "Invalid credentials"
+            }, { status: 401 })
+        }
+
         const cookieStore = await cookies();
 
+        const jwt = await createJWT({ id: user.dataValues.id })
+
         cookieStore.set({
-            name: "id",
-            value: user.dataValues.id,
+            name: "token",
+            value: jwt,
             path: "/",
             httpOnly: true,
             maxAge: 60 * 60 * 24 * 30
@@ -45,6 +59,6 @@ export const POST = async (req: Request) => {
             status: 0,
             error: 1,
             message: "Error logging in user",
-        })
+        }, { status: 500 })
     }
 }
