@@ -1,4 +1,3 @@
-import { ICustomNextRequest } from "@/app/middleware/types/CustomNextRequest";
 import { connect } from "@/db/connection";
 import Order from "@/db/models/Order";
 import User from "@/db/models/User";
