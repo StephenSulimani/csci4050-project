@@ -19,7 +19,7 @@ export const GET = async (req: NextRequest) => {
 
         const cash = await calcCash(user_id);
         const stocks = await getStocks(user_id);
-        const total_value = await getTotalValue(user_id, cash, stocks);
+        const total_value = await getTotalValue(cash, stocks);
 
         return NextResponse.json({
             status: 1,
@@ -39,7 +39,7 @@ export const GET = async (req: NextRequest) => {
     }
 }
 
-const getPrice = async (ticker: string) => {
+const getPrice = async (ticker: string): Promise<number> => {
     const apiKey = process.env.FINNHUB_API_KEY;
     const url = `https://finnhub.io/api/v1/quote?symbol=${ticker}&token=${apiKey}`;
     try {
@@ -48,7 +48,8 @@ const getPrice = async (ticker: string) => {
             throw new Error("Network response was not ok");
         }
         const data = await response.json();
-        return data.price;
+
+        return data.c;
     } catch (error) {
         console.error("Error fetching price:", error);
         throw new Error("Error fetching price");
@@ -83,9 +84,9 @@ const calcCash = async (user_id: string) => {
     return cash;
 }
 
-const getTotalValue = async (user_id: string, cash: number, stocks: { [key: string]: number }) => {
+const getTotalValue = async (cash: number, stocks: { [key: string]: number }) => {
     let unrealized_gains = 0;
-    for (let ticker in stocks) {
+    for (const ticker in stocks) {
         const amount = stocks[ticker];
         if (amount > 0) {
             const price = await getPrice(ticker);
