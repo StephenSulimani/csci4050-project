@@ -1,10 +1,12 @@
+import { ICustomNextRequest } from "@/app/middleware/types/CustomNextRequest";
 import { connect } from "@/db/connection";
 import Order from "@/db/models/Order";
 import User from "@/db/models/User";
 import { NextResponse } from "next/server";
 
-export const POST = async (req: Request) => {
+export const POST = async (req: ICustomNextRequest) => {
     const body = await req.json();
+    const user_id = req.userId;
 
     const { ticker, amount, type } = body;
 
