@@ -1,6 +1,34 @@
 import Order from '@/db/models/Order';
 import User from '@/db/models/User';
 
+export interface IFinnhubQuote {
+    c: number; // Current price
+    d: number; // Change
+    dp: number; // Change percent
+    h: number; // High
+    l: number; // Low
+    o: number; // Open
+    pc: number; // Previous close
+    t: number; // Timestamp
+}
+
+function isFinnhubQuote(obj: unknown): obj is IFinnhubQuote {
+    if (typeof obj !== 'object' || obj === null) {
+        return false;
+    }
+
+    const quote = obj as IFinnhubQuote;
+
+    return typeof quote.c === 'number'
+        && typeof quote.d === 'number'
+        && typeof quote.dp === 'number'
+        && typeof quote.h === 'number'
+        && typeof quote.l === 'number'
+        && typeof quote.o === 'number'
+        && typeof quote.pc === 'number'
+        && typeof quote.t === 'number';
+}
+
 export class FinnhubUtils {
     static async getPrice(ticker: string): Promise<number> {
         const apiKey = process.env.FINNHUB_API_KEY;
@@ -11,6 +39,10 @@ export class FinnhubUtils {
                 throw new Error('Network response was not ok');
             }
             const data = await response.json();
+
+            if (!isFinnhubQuote(data)) {
+                throw new Error("Unexpected response format")
+            }
 
             return data.c;
         } catch (error) {
