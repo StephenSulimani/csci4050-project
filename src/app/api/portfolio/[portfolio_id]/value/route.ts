@@ -4,6 +4,12 @@ import { NextRequest, NextResponse } from "next/server";
 import { FinnhubUtils } from "@/app/FinnhubUtils";
 import Portfolio from "@/db/models/Portfolio";
 
+type Holding = {
+    ticker: string,
+    amount: number,
+    value: number
+}
+
 export const GET = async (req: NextRequest, { params }: { params: { portfolio_id: string } }) => {
     const user_id = req.headers.get('x-user-id')
 
@@ -16,7 +22,7 @@ export const GET = async (req: NextRequest, { params }: { params: { portfolio_id
     }
 
 
-    const portfolio_id = params.portfolio_id;
+    const portfolio_id = (await params).portfolio_id;
 
     // Confirm that portfolio requested is owned by the user.
     const portfolio = await Portfolio.findOne({
@@ -56,19 +62,15 @@ export const GET = async (req: NextRequest, { params }: { params: { portfolio_id
     }
 }
 
-const getTotalValue = async (cash: number, stocks: { [key: string]: number }) => {
+const getTotalValue = async (cash: number, stocks: Holding[]) => {
     let unrealized_gains = 0;
-    for (const ticker in stocks) {
-        const amount = stocks[ticker];
-        if (amount > 0) {
-            const price = await FinnhubUtils.getPrice(ticker);
-            unrealized_gains += amount * price;
-        }
+    for (const stock of stocks) {
+        unrealized_gains += stock.value;
     }
     return cash + unrealized_gains;
 }
 
-const getStocks = async (portfolio_id: string) => {
+const getStocks = async (portfolio_id: string): Promise<Holding[]> => {
     const orders = await Order.findAll({
         where: {
             portfolio_id: portfolio_id
@@ -87,7 +89,16 @@ const getStocks = async (portfolio_id: string) => {
             stocks[order.ticker] = -order.amount;
         }
     }
-    return stocks;
+
+    const stock_array: Holding[] = await Promise.all(Object.entries(stocks).map(async ([ticker, amount]) => {
+        return {
+            "ticker": ticker,
+            "amount": amount,
+            "value": (await FinnhubUtils.getPrice(ticker)) * amount,
+        }
+    }));
+
+    return stock_array;
 }
 
 
