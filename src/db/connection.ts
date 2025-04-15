@@ -2,6 +2,7 @@ import { Sequelize } from "sequelize-typescript";
 import pg from 'pg'
 import User from "./models/User";
 import Order from "./models/Order";
+import Portfolio from "./models/Portfolio";
 
 export const sequelize = new Sequelize({
     database: process.env.DB_NAME,
@@ -16,7 +17,7 @@ export const sequelize = new Sequelize({
             mode: 'require'
         }
     },
-    models: [User, Order],
+    models: [User, Order, Portfolio],
     //models: [__dirname + '/models'],
     logging: false
 })

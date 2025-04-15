@@ -1,4 +1,5 @@
 import Order from '@/db/models/Order';
+import Portfolio from '@/db/models/Portfolio';
 import User from '@/db/models/User';
 
 export interface IFinnhubQuote {
@@ -50,21 +51,20 @@ export class FinnhubUtils {
             throw new Error('Error fetching price');
         }
     }
+    static async calcCash(portfolio_id: string): Promise<number> {
+        const portfolio = await Portfolio.findOne({
+            where: { id: portfolio_id }
+        })
 
-    static async calcCash(user_id: string): Promise<number> {
-        const user = await User.findOne({
-            where: { id: user_id }
-        });
-
-        if (!user) {
-            throw new Error("User not found");
+        if (!portfolio) {
+            throw new Error("Portfolio not found");
         }
 
         const orders = await Order.findAll({
-            where: { user_id: user_id }
+            where: { portfolio_id: portfolio_id }
         });
 
-        let cash = user.dataValues.startingCapital;
+        let cash = portfolio.dataValues.startingCapital;
         for (let order of orders) {
             order = order.dataValues;
             if (order.type === 'BUY') {
@@ -76,4 +76,5 @@ export class FinnhubUtils {
 
         return cash;
     }
+
 }

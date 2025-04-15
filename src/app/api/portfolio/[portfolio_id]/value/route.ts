@@ -2,8 +2,9 @@ import { connect } from "@/db/connection";
 import Order from "@/db/models/Order";
 import { NextRequest, NextResponse } from "next/server";
 import { FinnhubUtils } from "@/app/FinnhubUtils";
+import Portfolio from "@/db/models/Portfolio";
 
-export const GET = async (req: NextRequest) => {
+export const GET = async (req: NextRequest, { params }: { params: { portfolio_id: string } }) => {
     const user_id = req.headers.get('x-user-id')
 
     if (!user_id) {
@@ -14,13 +15,29 @@ export const GET = async (req: NextRequest) => {
         }, { status: 401 })
     }
 
+
+    const portfolio_id = params.portfolio_id;
+
+    // Confirm that portfolio requested is owned by the user.
+    const portfolio = await Portfolio.findOne({
+        where: { id: portfolio_id, user_id: user_id }
+    });
+
+    if (!portfolio) {
+        return NextResponse.json({
+            status: 0,
+            error: 1,
+            message: "Portfolio not found"
+        }, { status: 404 })
+    }
+
     try {
         await connect();
 
-        const cash = await FinnhubUtils.calcCash(user_id);
-        const stocks = await getStocks(user_id);
+        const cash = await FinnhubUtils.calcCash(portfolio_id);
+        const stocks = await getStocks(portfolio_id);
         const total_value = await getTotalValue(cash, stocks);
-
+        // Foreign key referencing User model
         return NextResponse.json({
             status: 1,
             error: 0,
@@ -51,10 +68,10 @@ const getTotalValue = async (cash: number, stocks: { [key: string]: number }) =>
     return cash + unrealized_gains;
 }
 
-const getStocks = async (user_id: string) => {
+const getStocks = async (portfolio_id: string) => {
     const orders = await Order.findAll({
         where: {
-            user_id: user_id
+            portfolio_id: portfolio_id
         }
     });
     const stocks = {};
@@ -72,3 +89,5 @@ const getStocks = async (user_id: string) => {
     }
     return stocks;
 }
+
+

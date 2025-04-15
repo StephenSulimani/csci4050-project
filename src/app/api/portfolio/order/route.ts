@@ -2,11 +2,38 @@ import { connect } from "@/db/connection";
 import Order from "@/db/models/Order";
 import { NextRequest, NextResponse } from "next/server";
 import { FinnhubUtils } from "@/app/FinnhubUtils";
+import Portfolio from "@/db/models/Portfolio";
+
+interface IOrderCreationRequest {
+    ticker: string;
+    amount: number;
+    type: 'BUY' | 'SELL';
+    portfolio_id: string;
+}
+
+function isOrderCreationRequest(obj: Unknown): obj is IOrderCreationRequest {
+    if (typeof obj !== 'object' || obj === null) {
+        return false;
+    }
+
+    const payload = obj as IOrderCreationRequest;
+
+    return (typeof payload.ticker === 'string'
+        && typeof payload.amount === 'number'
+        && typeof payload.type === 'string'
+        && typeof payload.portfolio_id === 'string');
+}
 
 export const POST = async (req: NextRequest) => {
     const body = await req.json();
 
-    const { ticker, amount, type } = body;
+    if (!isOrderCreationRequest(body)) {
+        return NextResponse.json({
+            status: 0,
+            error: 1,
+            message: "Invalid request",
+        }, { status: 400 })
+    }
 
     const user_id = req.headers.get('x-user-id')
 
@@ -18,22 +45,34 @@ export const POST = async (req: NextRequest) => {
         }, { status: 401 })
     }
 
+    const portfolio = await Portfolio.findOne({
+        where: { id: body.portfolio_id, user_id: user_id }
+    });
+
+    if (!portfolio) {
+        return NextResponse.json({
+            status: 0,
+            error: 1,
+            message: "Portfolio not found"
+        }, { status: 404 })
+    }
+
     try {
         await connect();
         const datetime = new Date().toISOString();
-        const price = await FinnhubUtils.getPrice(ticker);
-        const cash = await FinnhubUtils.calcCash(user_id);
-        if (type === 'BUY' && cash < price * amount) {
+        const price = await FinnhubUtils.getPrice(body.ticker);
+        const cash = await FinnhubUtils.calcCash(body.portfolio_id);
+        if (body.type === 'BUY' && cash < price * body.amount) {
             return NextResponse.json({
                 status: 0,
                 error: 1,
                 message: "Not enough cash to buy",
             })
-        } else if (type === 'SELL') {
+        } else if (body.type === 'SELL') {
             const orders = await Order.findAll({
                 where: {
-                    user_id: user_id,
-                    ticker: ticker,
+                    portfolio_id: body.portfolio_id,
+                    ticker: body.ticker,
                     type: 'BUY'
                 }
             });
@@ -41,7 +80,7 @@ export const POST = async (req: NextRequest) => {
             for (const order of orders) {
                 totalAmount += order.dataValues.amount;
             }
-            if (totalAmount < amount) {
+            if (totalAmount < body.amount) {
                 return NextResponse.json({
                     status: 0,
                     error: 1,
@@ -51,13 +90,14 @@ export const POST = async (req: NextRequest) => {
         }
 
         await Order.create({
-            ticker,
-            amount,
-            type,
+            ticker: body.ticker,
+            amount: body.amount,
+            type: body.type,
             datetime,
             price,
-            user_id
-        });
+            portfolio_id: body.portfolio_id
+        })
+
         return NextResponse.json({
             status: 1,
             error: 0,
