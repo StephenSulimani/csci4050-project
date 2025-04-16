@@ -7,7 +7,7 @@ interface IUser {
 }
 
 interface IAuthContext {
-    user: IUser;
+    user: IUser | null;
     loggedIn: boolean;
     loading: boolean;
     error: string;
@@ -16,12 +16,13 @@ interface IAuthContext {
     logout: () => void;
 }
 
-const AuthContext = createContext({
+const AuthContext = createContext<IAuthContext>({
     user: null,
     loggedIn: false,
     loading: false,
     error: "",
-    login: (email: string, password: string) => { },
+    login: () => { },
+    register: () => { },
     logout: () => { }
 });
 
@@ -31,11 +32,7 @@ export const useAuth = () => {
 
 export const AuthProvider = ({ children }: Readonly<{ children: React.ReactNode }>) => {
 
-    const [user, setUser] = useState<IUser>({
-        id: "",
-        name: "",
-        email: ""
-    });
+    const [user, setUser] = useState<IUser | null>(null);
     const [loading, setLoading] = useState(true);
 
     const [loggedIn, setLoggedIn] = useState(false);
