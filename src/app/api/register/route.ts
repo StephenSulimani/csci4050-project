@@ -66,7 +66,11 @@ export const POST = async (req: Request) => {
         return NextResponse.json({
             status: 1,
             error: 0,
-            message: "User created successfully",
+            message: {
+                id: user.dataValues.id,
+                name: user.dataValues.name,
+                email: user.dataValues.email
+            },
         })
     } catch (error: unknown) {
         if (error instanceof UniqueConstraintError) {
