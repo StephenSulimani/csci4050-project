@@ -1,6 +1,5 @@
 import Order from '@/db/models/Order';
 import Portfolio from '@/db/models/Portfolio';
-import User from '@/db/models/User';
 
 export interface IFinnhubQuote {
     c: number; // Current price

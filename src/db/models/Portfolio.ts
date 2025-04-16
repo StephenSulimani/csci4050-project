@@ -12,7 +12,7 @@ export default class Portfolio extends Model<Portfolio> {
 
     @Column({
         type: DataType.TEXT,
-        allowNull: true
+        defaultValue: "Portfolio"
     })
     declare public name: string;
 
@@ -26,5 +26,5 @@ export default class Portfolio extends Model<Portfolio> {
     @Column({
         type: DataType.UUID
     })
-    declare public user_id;
+    declare public user_id: string;
 }

@@ -68,11 +68,14 @@ export const PUT = async (req: NextRequest) => {
     try {
         await connect();
 
+        const portfolio_name = body.name ? body.name : "New Portfolio";
+        const starting_capital = body.starting_capital ? body.starting_capital : 10000;
+
         const portfolio = await Portfolio.create({
-            name: body.name ? body.name : "New Portfolio",
             user_id: user_id,
-            startingCapital: body.starting_capital ? body.starting_capital : 10000
-        });
+            name: portfolio_name,
+            startingCapital: starting_capital
+        })
 
         return NextResponse.json({
             status: 1,
