@@ -16,6 +16,5 @@ export async function middleware(req: NextRequest) {
         return authResponse;
     }
 
-
     return NextResponse.next();
 }
