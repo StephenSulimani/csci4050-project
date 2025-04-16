@@ -44,6 +44,7 @@ export const AuthProvider = ({ children }: Readonly<{ children: React.ReactNode 
     useEffect(() => {
         const checkAuth = async () => {
             try {
+                setLoading(true);
                 const response = await fetch('/api/me', {
                     method: 'GET',
                     credentials: 'include'
@@ -83,6 +84,7 @@ export const AuthProvider = ({ children }: Readonly<{ children: React.ReactNode 
 
     const login = async (email: string, password: string) => {
         try {
+            setLoading(true);
             const response = await fetch('/api/login', {
                 method: 'POST',
                 headers: {
@@ -121,6 +123,7 @@ export const AuthProvider = ({ children }: Readonly<{ children: React.ReactNode 
 
     const register = async (name: string, email: string, password: string) => {
         try {
+            setLoading(true);
             const response = await fetch('/api/register', {
                 method: 'POST',
                 headers: {
@@ -153,6 +156,7 @@ export const AuthProvider = ({ children }: Readonly<{ children: React.ReactNode 
 
     const logout = async () => {
         try {
+            setLoading(true);
             const response = await fetch('/api/logout', {
                 method: 'GET',
                 credentials: 'include'
