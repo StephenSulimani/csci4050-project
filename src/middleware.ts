@@ -6,7 +6,8 @@ const blacklistedEndpoints: string[] = ['/api/login', '/api/register'];
 export async function middleware(req: NextRequest) {
     const isBlacklisted = blacklistedEndpoints.some(endpoint => req.nextUrl.pathname.startsWith(endpoint))
 
-    if (isBlacklisted) {
+    // if isBlacklisted or request does not start with /api
+    if (isBlacklisted || !req.nextUrl.pathname.startsWith('/api')) {
         return NextResponse.next();
     }
 
