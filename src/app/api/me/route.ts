@@ -30,7 +30,6 @@ export const GET = async (req: NextRequest) => {
         status: 1,
         error: 0,
         message: {
-            id: user.dataValues.id,
             name: user.dataValues.name,
             email: user.dataValues.email
         }

@@ -3,7 +3,6 @@
 import { createContext, useContext, useEffect, useState } from "react";
 
 interface IUser {
-    id: string;
     name: string;
     email: string;
 }
@@ -58,7 +57,6 @@ export const AuthProvider = ({ children }: Readonly<{ children: React.ReactNode 
                 }
                 else {
                     setUser({
-                        id: "",
                         name: "",
                         email: ""
                     })
@@ -67,7 +65,6 @@ export const AuthProvider = ({ children }: Readonly<{ children: React.ReactNode 
             }
             catch {
                 setUser({
-                    id: "",
                     name: "",
                     email: ""
                 })
@@ -102,7 +99,6 @@ export const AuthProvider = ({ children }: Readonly<{ children: React.ReactNode 
                 setError("");
             } else {
                 setUser({
-                    id: "",
                     name: "",
                     email: ""
                 })
@@ -164,7 +160,6 @@ export const AuthProvider = ({ children }: Readonly<{ children: React.ReactNode 
 
             setLoggedIn(false);
             setUser({
-                id: "",
                 name: "",
                 email: ""
             })

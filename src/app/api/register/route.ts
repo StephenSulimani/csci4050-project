@@ -67,7 +67,6 @@ export const POST = async (req: Request) => {
             status: 1,
             error: 0,
             message: {
-                id: user.dataValues.id,
                 name: user.dataValues.name,
                 email: user.dataValues.email
             },
