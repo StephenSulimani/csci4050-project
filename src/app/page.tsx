@@ -10,7 +10,7 @@ export function FormattedChart() {
     return (
         <div className="h-screen flex items-center justify-center">
             <div className="w-full max-w-4xl h-full">
-                <StockChart />
+                <StockChart ticker="AAPL" />
             </div>
         </div>
     )
