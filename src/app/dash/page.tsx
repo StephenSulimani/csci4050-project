@@ -7,7 +7,7 @@ export default function StockTickerPage() {
     const [ticker, setTicker] = useState('AAPL');
     const [currentTicker, setCurrentTicker] = useState('AAPL');
 
-    const handleSubmit = (e) => {
+    const handleSubmit = (e: any) => {
         e.preventDefault();
         setCurrentTicker(ticker);
     };

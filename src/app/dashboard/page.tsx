@@ -28,7 +28,7 @@ export default function Dashboard() {
 
     const [portfolioChosen, setPortfolioChosen] = useState(false);
 
-    let portfolios: portfolio[] = []
+    let portfolios: portfolio[] = [];
 
     const getPortfolios = async () => {
         const response = await fetch(`/api/portfolio`, {
@@ -67,7 +67,7 @@ export default function Dashboard() {
     return (
         <div>
             <h1>Gnail Trades</h1>
-            <Button type="button">
+            <Button type="button" onClick={() => console.log(portfolios)}>
                 Logout
             </Button>
             <div>
@@ -103,19 +103,6 @@ export default function Dashboard() {
                             </Table.Root>
                         </Table.ScrollArea>
                         <Create/>
-                    </Card.Body>
-                </Card.Root>
-            </div>
-            <div>
-                <Card.Root size="sm">
-                    <Card.Header>
-                        <Heading size="md">Search for a Stock</Heading>
-                    </Card.Header>
-                    <Card.Body color="fg.muted">
-                        <div>
-                            <p>Ticker:</p>
-                            <Input name="name" type="text" placeholder="IBM"/>
-                        </div>
                     </Card.Body>
                 </Card.Root>
             </div>
