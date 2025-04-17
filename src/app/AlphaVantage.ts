@@ -1,3 +1,5 @@
+import fetchCookie from "fetch-cookie";
+
 class AlphaVantage {
     api_keys: string[];
     base_url: string = "https://www.alphavantage.co/query?function="
@@ -14,13 +16,29 @@ class AlphaVantage {
     }
 
     async new_api_key() {
-        const response = await fetch('https://www.alphavantage.co/create_post/', {
+        const session = fetchCookie(fetch);
+        const res = await session("https://www.alphavantage.co/support/#api-key",
+            {
+                method: 'GET',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8',
+                    'Referer': 'https://www.alphavantage.co/support/',
+                    'X-Real-IP': this.random_ip,
+                    'X-Forwarded-For': this.random_ip
+                },
+            });
+        const cookies = res.headers.get('set-cookie');
+        const csrf_regex = /csrftoken=(.*?);/gm;
+        const csrf = csrf_regex.exec(cookies!)[1];
+        const response = await session('https://www.alphavantage.co/create_post/', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8',
                 'Referer': 'https://www.alphavantage.co/support/',
                 'X-Real-IP': this.random_ip,
-                'X-Forwarded-For': this.random_ip
+                'X-Forwarded-For': this.random_ip,
+                'Cookie': cookies!,
+                'X-CSRFToken': csrf
             },
             body: `first_text=deprecated&last_text=deprecated&occupation_text=Investor&organization_text=ranadgajkg&email_text=gakngkjag%40gmail.co`
         })
@@ -50,6 +68,7 @@ class AlphaVantage {
     }
 
     async daily_time_series(ticker: string) {
+        this.api_keys.push(await this.new_api_key());
         const response = await this.call("TIME_SERIES_DAILY&symbol=" + ticker);
         const data = await response.json();
         return data;
