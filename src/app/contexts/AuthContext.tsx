@@ -1,9 +1,9 @@
 "use client"
 
 import { createContext, useContext, useEffect, useState } from "react";
+import { z } from "zod";
 
 interface IUser {
-    id: string;
     name: string;
     email: string;
 }
@@ -32,6 +32,17 @@ export const useAuth = () => {
     return useContext(AuthContext);
 }
 
+const registerSchema = z.object({
+    name: z.string().min(1, "Name is required"),
+    email: z.string().email().min(1, "Email is required"),
+    password: z.string().min(1, "Password is required")
+})
+
+const loginSchema = z.object({
+    email: z.string().email().min(1, "Email is required"),
+    password: z.string().min(1, "Password is required")
+})
+
 export const AuthProvider = ({ children }: Readonly<{ children: React.ReactNode }>) => {
 
     const [user, setUser] = useState<IUser | null>(null);
@@ -44,6 +55,7 @@ export const AuthProvider = ({ children }: Readonly<{ children: React.ReactNode 
     useEffect(() => {
         const checkAuth = async () => {
             try {
+                setLoading(true);
                 const response = await fetch('/api/me', {
                     method: 'GET',
                     credentials: 'include'
@@ -57,7 +69,6 @@ export const AuthProvider = ({ children }: Readonly<{ children: React.ReactNode 
                 }
                 else {
                     setUser({
-                        id: "",
                         name: "",
                         email: ""
                     })
@@ -66,7 +77,6 @@ export const AuthProvider = ({ children }: Readonly<{ children: React.ReactNode 
             }
             catch {
                 setUser({
-                    id: "",
                     name: "",
                     email: ""
                 })
@@ -83,6 +93,12 @@ export const AuthProvider = ({ children }: Readonly<{ children: React.ReactNode 
 
     const login = async (email: string, password: string) => {
         try {
+            const validated = loginSchema.safeParse({ email, password });
+            if (!validated.success) {
+                setError(validated.error.errors[0].message);
+                return;
+            }
+            setLoading(true);
             const response = await fetch('/api/login', {
                 method: 'POST',
                 headers: {
@@ -100,7 +116,6 @@ export const AuthProvider = ({ children }: Readonly<{ children: React.ReactNode 
                 setError("");
             } else {
                 setUser({
-                    id: "",
                     name: "",
                     email: ""
                 })
@@ -121,6 +136,12 @@ export const AuthProvider = ({ children }: Readonly<{ children: React.ReactNode 
 
     const register = async (name: string, email: string, password: string) => {
         try {
+            const validated = registerSchema.safeParse({ name, email, password });
+            if (!validated.success) {
+                setError(validated.error.errors[0].message);
+                return;
+            }
+            setLoading(true);
             const response = await fetch('/api/register', {
                 method: 'POST',
                 headers: {
@@ -153,6 +174,7 @@ export const AuthProvider = ({ children }: Readonly<{ children: React.ReactNode 
 
     const logout = async () => {
         try {
+            setLoading(true);
             const response = await fetch('/api/logout', {
                 method: 'GET',
                 credentials: 'include'
@@ -160,7 +182,6 @@ export const AuthProvider = ({ children }: Readonly<{ children: React.ReactNode 
 
             setLoggedIn(false);
             setUser({
-                id: "",
                 name: "",
                 email: ""
             })

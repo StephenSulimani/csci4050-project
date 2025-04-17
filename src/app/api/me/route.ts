@@ -1,3 +1,4 @@
+import { connect } from "@/db/connection";
 import User from "@/db/models/User";
 import { NextRequest, NextResponse } from "next/server";
 
@@ -12,27 +13,38 @@ export const GET = async (req: NextRequest) => {
         }, { status: 401 })
     }
 
-    const user = await User.findOne({
-        where: {
-            id: user_id
-        }
-    })
+    try {
+        await connect();
+        const user = await User.findOne({
+            where: {
+                id: user_id
+            }
+        })
 
-    if (!user) {
+        if (!user) {
+            return NextResponse.json({
+                status: 0,
+                error: 1,
+                message: "User not found"
+            }, { status: 404 })
+        }
+
+        return NextResponse.json({
+            status: 1,
+            error: 0,
+            message: {
+                name: user.dataValues.name,
+                email: user.dataValues.email
+            }
+        })
+
+    }
+    catch {
         return NextResponse.json({
             status: 0,
             error: 1,
-            message: "User not found"
-        }, { status: 404 })
+            message: "Internal server error"
+        }, { status: 500 })
     }
 
-    return NextResponse.json({
-        status: 1,
-        error: 0,
-        message: {
-            id: user.dataValues.id,
-            name: user.dataValues.name,
-            email: user.dataValues.email
-        }
-    })
 }
