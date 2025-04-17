@@ -27,11 +27,12 @@ const chartConfig = {
 } satisfies ChartConfig
 
 
-export function StockChart() {
+export function StockChart(props: { ticker: string }) {
+    console.log(props.ticker);
     const [chartData, setChartData] = useState([]);
     useEffect(() => {
         const fetchData = async () => {
-            const response = await fetch('/api/data/AAPL', {
+            const response = await fetch(`/api/data/${props.ticker}`, {
                 method: 'GET',
                 credentials: 'include'
             })
@@ -49,12 +50,14 @@ export function StockChart() {
 
             chartData.reverse();
 
-            setChartData((prevData) => [...prevData, ...chartData]);
+            setChartData(chartData);
+
+            // setChartData((prevData) => [...prevData, ...chartData]);
 
         }
         fetchData();
 
-    }, [])
+    }, [props.ticker])
     return (
         <Card>
             <CardHeader>
