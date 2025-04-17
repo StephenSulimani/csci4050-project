@@ -24,41 +24,6 @@ export default function Login() {
 
     if (registerPage) {
         return (
-<<<<<<< HEAD
-            <Card.Root maxW="sm">
-                <Card.Header>
-                    <Card.Title>Login</Card.Title>
-                    <Card.Description>
-                        Fill in the form below to login
-                    </Card.Description>
-                </Card.Header>
-                <Card.Body>
-                    <Fieldset.Root size="lg" maxW="md">
-                        <Fieldset.Content>
-                
-                        <Field.Root>
-                            <Field.Label>Email address</Field.Label>
-                            <Input name="email" type="email" />
-                        </Field.Root>
-                
-                        <Field.Root>
-                            <Field.Label>Password</Field.Label>
-                            <Input name="password" type="text" />
-                        </Field.Root>
-                        </Fieldset.Content>
-                        
-                    </Fieldset.Root>
-                </Card.Body>
-                <Card.Footer justifyContent="flex-end">
-                    <Button type="submit" alignSelf="flex-start">
-                        Login
-                    </Button>
-                    <Button variant="outline" type="button" alignSelf="flex-end" onClick={() => router.push('../register')}>
-                        Register
-                    </Button>
-                </Card.Footer>
-            </Card.Root>
-=======
             <div className="grid place-items-center h-screen">
                 <div className="w-full max-w-md">
 
@@ -104,7 +69,6 @@ export default function Login() {
                 </div>
             </div>
 
->>>>>>> 7bbf661648d5da52cd3e6d0cffc00f07f7b703fc
         )
     }
 
