@@ -15,6 +15,15 @@ type Holding = {
     value: number
 }
 
+export interface IPortfolio {
+    name: string;
+    id: string;
+    starting_capital: number;
+    cash: number;
+    stocks: Holding[];
+    total_value: number;
+}
+
 
 export const GET = async (req: NextRequest) => {
     const user_id = req.headers.get('x-user-id');
