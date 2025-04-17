@@ -1,6 +1,5 @@
 import { createJWT } from "@/app/auth";
 import { connect } from "@/db/connection";
-import Order from "@/db/models/Order";
 import User from "@/db/models/User";
 import bcrypt from "bcryptjs";
 import { cookies } from "next/headers";
@@ -39,6 +38,14 @@ export const POST = async (req: Request) => {
 
     const { email, password, name } = body;
 
+    if (!email || !password || !name || email.length === 0 || password.length === 0 || name.length === 0) {
+        return NextResponse.json({
+            status: 0,
+            error: 1,
+            message: "Missing required fields",
+        }, { status: 400 })
+    }
+
     try {
         await connect();
 
@@ -66,7 +73,10 @@ export const POST = async (req: Request) => {
         return NextResponse.json({
             status: 1,
             error: 0,
-            message: "User created successfully",
+            message: {
+                name: user.dataValues.name,
+                email: user.dataValues.email
+            },
         })
     } catch (error: unknown) {
         if (error instanceof UniqueConstraintError) {

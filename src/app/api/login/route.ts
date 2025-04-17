@@ -52,7 +52,10 @@ export const POST = async (req: Request) => {
         return NextResponse.json({
             status: 1,
             error: 0,
-            message: "User logged in successfully",
+            message: {
+                "name": user.dataValues.name,
+                "email": user.dataValues.email
+            },
         })
     } catch {
         return NextResponse.json({

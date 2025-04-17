@@ -1,5 +1,5 @@
-import { Table, Column, Model, PrimaryKey, Default, DataType, ForeignKey, Validate } from 'sequelize-typescript';
-import User from './User';
+import { Table, Column, Model, PrimaryKey, DataType, ForeignKey, Validate } from 'sequelize-typescript';
+import Portfolio from './Portfolio';
 
 @Table
 export default class Order extends Model<Order> {
@@ -31,9 +31,9 @@ export default class Order extends Model<Order> {
     @Column(DataType.ENUM('BUY', 'SELL'))
     declare public type: 'BUY' | 'SELL';
 
-    @ForeignKey(() => User)
+    @ForeignKey(() => Portfolio)
     @Column({
         type: DataType.UUID,
     })
-    declare public user_id: string; // Foreign key referencing User model
+    declare public portfolio_id: string;
 }

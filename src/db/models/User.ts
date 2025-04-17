@@ -24,10 +24,4 @@ export default class User extends Model<User> {
         type: DataType.STRING,
     })
     declare public password: string;
-
-    @Column({
-        type: DataType.FLOAT,
-        defaultValue: 10000
-    })
-    declare public startingCapital: number
 }
