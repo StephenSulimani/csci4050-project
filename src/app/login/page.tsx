@@ -12,7 +12,7 @@ import { useRouter } from 'next/navigation'
                 <Card.Header>
                     <Card.Title>Login</Card.Title>
                     <Card.Description>
-                        Fill in the form below to log in
+                        Fill in the form below to login
                     </Card.Description>
                 </Card.Header>
                 <Card.Body>
