@@ -1,6 +1,26 @@
 import { Button, CloseButton, Dialog, Portal } from "@chakra-ui/react"
+import { useRouter } from 'next/navigation'
 
-export default function Delete() {
+export default function Delete(props: any) {
+
+  const router = useRouter();
+
+  const deletePortfolio = async (id: any) => {
+    const response = await fetch(`../api/portfolio/${id}`, {
+      method: 'DELETE',
+      credentials: "include"
+    });
+
+    if (response.ok) {
+      // Handle successful deletion
+      console.log('Portfolio deleted!');
+      router.push('../')
+    } else {
+      // Handle error
+      console.error('Failed to delete portfolio');
+    }
+  };
+
   return (
     <Dialog.Root>
       <Dialog.Trigger asChild>
@@ -19,7 +39,7 @@ export default function Delete() {
               <Dialog.ActionTrigger asChild>
                 <Button variant="outline">No</Button>
               </Dialog.ActionTrigger>
-              <Button>Yes</Button>
+              <Button onClick={() => deletePortfolio(props.id)}>Yes</Button>
             </Dialog.Footer>
             <Dialog.CloseTrigger asChild>
               <CloseButton size="sm" />

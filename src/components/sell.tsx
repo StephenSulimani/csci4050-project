@@ -1,6 +1,31 @@
 import { Button, CloseButton, Dialog, Portal, Fieldset, Field, Input } from "@chakra-ui/react"
 
-export default function Sell() {
+export default function Sell(props: any) {
+
+    const ticker = (document.getElementsByName('ticker')[0] as HTMLInputElement)
+    const amount = (document.getElementsByName('numShared')[0] as HTMLInputElement)
+
+    const sellStock = async (id: any) => {
+        const response = await fetch(`../api/portfolio/order`, {
+          method: 'Post',
+          credentials: "include",
+          body: JSON.stringify({
+            ticker: ticker.value,
+            type: 'Sell',
+            amount: amount.value,
+            portfolio_id: id
+          })
+        });
+    
+        if (response.ok) {
+          // Handle successful buy
+          console.log('Stock has been sold!');
+        } else {
+          // Handle error
+          console.error('Failed to sell stock');
+        }
+    };
+
     return (
         <Dialog.Root>
             <Dialog.Trigger asChild>
@@ -36,7 +61,7 @@ export default function Sell() {
                             <Dialog.ActionTrigger asChild>
                                 <Button variant="outline">Cancel</Button>
                             </Dialog.ActionTrigger>
-                            <Button>Submit</Button>
+                            <Button onClick={() => sellStock(props.id)}>Submit</Button>
                         </Dialog.Footer>
                         <Dialog.CloseTrigger asChild>
                             <CloseButton size="sm" />

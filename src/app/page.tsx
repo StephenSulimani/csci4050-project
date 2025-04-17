@@ -31,7 +31,7 @@ export default function Home() {
                 </Card.Body>
                 <Card.Footer justifyContent="flex-end">
                     <Button variant="solid" type="button" onClick={() => router.push('/login')}>Login</Button>
-                    <Button variant="outline" type="button" onClick={() => router.push('/register')}>Register</Button>
+                    <Button variant="outline" type="button" onClick={() => router.push('/login')}>Register</Button>
                 </Card.Footer>
             </Card.Root>
             <FormattedChart />

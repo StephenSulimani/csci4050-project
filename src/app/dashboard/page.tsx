@@ -2,7 +2,7 @@
 
 import { Button, Card, Heading, Input } from "@chakra-ui/react"
 import { Table } from "@chakra-ui/react"
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import Delete from '../../components/delete'
 import Buy from '../../components/buy'
 import Sell from '../../components/sell'
@@ -11,32 +11,57 @@ import Search from '../../components/search'
 
 export default function Dashboard() {
 
+    interface portfolio {
+        name: string,
+        id: string,
+        starting_capital: number,
+        cash: number,
+        stocks: stock[],
+        total_value: number
+    }
+
+    interface stock {
+        ticker: string,
+        amount: number,
+        value: number,
+    }
+
     const [portfolioChosen, setPortfolioChosen] = useState(false);
 
-    const portfolios = [
-        {
-            id: "1",
-            name: "portfolio",
-            totalValue: "10000",
-            cashValue: "100",
-            startingCapital: "10000",
-            return: "8.05"
-        }
-    ]
+    let portfolios: portfolio[] = []
 
-    const currentPortfolio = {
-        id: "1",
-        name: "portfolio1",
-        stocks: [
-            {
-                ticker: "IBM",
-                purchasePrice: "50",
-                marketPrice: "60",
-                sharesOwned: "3",
-                return: "10%"
-            }
-        ]
+    const getPortfolios = async () => {
+        const response = await fetch(`/api/portfolio`, {
+            method: 'GET',
+            credentials: "include"
+        }).then(response => response.json())
+        .then(data => {
+            portfolios = data.message.portfolios
+            console.log(portfolios);
+         });
     }
+
+    let currentPortfolio: portfolio = {
+        name: '',
+        id: '',
+        starting_capital: 0,
+        cash: 0,
+        stocks: [{
+            ticker: '',
+            amount: 0,
+            value: 0
+        }],
+        total_value: 0
+    };
+
+    function choosePortfolio(id: any) {
+        setPortfolioChosen(true);
+        currentPortfolio = (portfolios.filter(portfolio => {portfolio.id == id})[0])
+    }
+
+    useEffect(() => {
+        getPortfolios()
+    }), []
 
     if (!portfolioChosen) {
     return (
@@ -66,12 +91,12 @@ export default function Dashboard() {
 
                                 <Table.Body>
                                     {portfolios.map((portfolio) => (
-                                        <Table.Row key={portfolio.id} onClick={() => setPortfolioChosen(true)}>
+                                        <Table.Row key={portfolio.id} onClick={() => choosePortfolio(portfolio.id)}>
                                             <Table.Cell>{portfolio.name}</Table.Cell>
-                                            <Table.Cell>{portfolio.totalValue}</Table.Cell>
-                                            <Table.Cell>{portfolio.startingCapital}</Table.Cell>
-                                            <Table.Cell>{portfolio.return}</Table.Cell>
-                                            <Table.Cell textAlign="end">{portfolio.cashValue}</Table.Cell>
+                                            <Table.Cell>{portfolio.total_value}</Table.Cell>
+                                            <Table.Cell>{portfolio.starting_capital}</Table.Cell>
+                                            <Table.Cell>{(portfolio.total_value-portfolio.starting_capital)/portfolio.starting_capital}</Table.Cell>
+                                            <Table.Cell textAlign="end">{}</Table.Cell>
                                         </Table.Row>
                                     ))}
                                 </Table.Body>
@@ -121,10 +146,9 @@ export default function Dashboard() {
                                 <Table.Header>
                                     <Table.Row bg="bg.subtle">
                                         <Table.ColumnHeader>Stock Ticker</Table.ColumnHeader>
-                                        <Table.ColumnHeader>Purchase Price</Table.ColumnHeader>
                                         <Table.ColumnHeader>Market Price</Table.ColumnHeader>
                                         <Table.ColumnHeader>Shares Owned</Table.ColumnHeader>
-                                        <Table.ColumnHeader textAlign="end">Return</Table.ColumnHeader>
+                                        <Table.ColumnHeader>Value</Table.ColumnHeader>
                                     </Table.Row>
                                 </Table.Header>
 
@@ -132,10 +156,9 @@ export default function Dashboard() {
                                     {currentPortfolio.stocks.map((stock) => (
                                         <Table.Row>
                                             <Table.Cell>{stock.ticker}</Table.Cell>
-                                            <Table.Cell>{stock.purchasePrice}</Table.Cell>
-                                            <Table.Cell>{stock.marketPrice}</Table.Cell>
-                                            <Table.Cell>{stock.sharesOwned}%</Table.Cell>
-                                            <Table.Cell textAlign="end">{stock.return}</Table.Cell>
+                                            <Table.Cell>{stock.value/stock.amount}</Table.Cell>
+                                            <Table.Cell>{stock.amount}</Table.Cell>
+                                            <Table.Cell>{stock.value}%</Table.Cell>
                                         </Table.Row>
                                     ))}
                                 </Table.Body>

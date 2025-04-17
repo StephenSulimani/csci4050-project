@@ -1,6 +1,29 @@
 import { Button, CloseButton, Dialog, Portal, Fieldset, Field, Input } from "@chakra-ui/react"
 
 export default function Create() {
+
+    const nameInput = (document.getElementsByName('portfolioName')[0] as HTMLInputElement)
+    const startingCapital = (document.getElementsByName('startingCapital')[0] as HTMLInputElement)
+
+    const createPortfolio = async () => {
+        const response = await fetch(`../api/portfolio/`, {
+          method: 'PUT',
+          credentials: "include",
+          body: JSON.stringify({
+            name: nameInput.value,
+            starting_Capital: startingCapital.value
+          })
+        });
+    
+        if (response.ok) {
+          // Handle successful creation
+          console.log('Portfolio created!');
+        } else {
+          // Handle error
+          console.error('Failed to create portfolio');
+        }
+    };
+
     return (
         <Dialog.Root>
             <Dialog.Trigger asChild>

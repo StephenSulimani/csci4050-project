@@ -1,6 +1,32 @@
 import { Button, CloseButton, Dialog, Portal, Fieldset, Field, Input } from "@chakra-ui/react"
+import { propagateServerField } from "next/dist/server/lib/render-server";
 
-export default function Buy() {
+export default function Buy(props: any) {
+
+    const ticker = (document.getElementsByName('ticker')[0] as HTMLInputElement)
+    const amount = (document.getElementsByName('numShared')[0] as HTMLInputElement)
+
+    const buyStock = async (id: any) => {
+        const response = await fetch(`../api/portfolio/order`, {
+          method: 'Post',
+          credentials: "include",
+          body: JSON.stringify({
+            ticker: ticker.value,
+            type: 'BUY',
+            amount: ticker.value,
+            portfolio_id: id
+          })
+        });
+    
+        if (response.ok) {
+          // Handle successful buy
+          console.log('Stock has been purchased!');
+        } else {
+          // Handle error
+          console.error('Failed to buy stock');
+        }
+    };
+
     return (
         <Dialog.Root>
             <Dialog.Trigger asChild>
@@ -36,7 +62,7 @@ export default function Buy() {
                             <Dialog.ActionTrigger asChild>
                                 <Button variant="outline">Cancel</Button>
                             </Dialog.ActionTrigger>
-                            <Button>Submit</Button>
+                            <Button onClick={() => buyStock(props.id)}>Submit</Button>
                         </Dialog.Footer>
                         <Dialog.CloseTrigger asChild>
                             <CloseButton size="sm" />
