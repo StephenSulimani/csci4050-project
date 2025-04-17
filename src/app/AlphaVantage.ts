@@ -12,7 +12,12 @@ class AlphaVantage {
     }
 
     get api_key() {
-        return this.api_keys[Math.floor(Math.random() * this.api_keys.length)];
+        let key = '';
+
+        while (key.length == 0 || !key) {
+            key = this.api_keys[Math.floor(Math.random() * this.api_keys.length)];
+        }
+        return key;
     }
 
     async new_api_key() {

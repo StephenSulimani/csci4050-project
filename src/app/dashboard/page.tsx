@@ -8,6 +8,7 @@ import Buy from '../../components/buy'
 import Sell from '../../components/sell'
 import Create from '../../components/create'
 import Search from '../../components/search'
+import { IPortfolio } from "../api/portfolio/route"
 
 export default function Dashboard() {
 
@@ -28,20 +29,9 @@ export default function Dashboard() {
 
     const [portfolioChosen, setPortfolioChosen] = useState(false);
 
-    let portfolios: portfolio[] = [];
+    const [portfolios, setPortfolios] = useState<IPortfolio[]>([])
 
-    const getPortfolios = async () => {
-        const response = await fetch(`/api/portfolio`, {
-            method: 'GET',
-            credentials: "include"
-        }).then(response => response.json())
-        .then(data => {
-            portfolios = data.message.portfolios
-            console.log(portfolios);
-         });
-    }
-
-    let currentPortfolio: portfolio = {
+    const [currentPortfolio, setCurrentPortfolio] = useState<IPortfolio>({
         name: '',
         id: '',
         starting_capital: 0,
@@ -52,63 +42,78 @@ export default function Dashboard() {
             value: 0
         }],
         total_value: 0
-    };
+    });
+
+
 
     function choosePortfolio(id: any) {
+        console.log(`ID: ${id} | Portfolio Len: ${portfolios.length}`);
+        setCurrentPortfolio(portfolios.filter(portfolio => portfolio.id === id)[0])
         setPortfolioChosen(true);
-        currentPortfolio = (portfolios.filter(portfolio => {portfolio.id == id})[0])
     }
 
     useEffect(() => {
+        const getPortfolios = async () => {
+            const response = await fetch(`/api/portfolio`, {
+                method: 'GET',
+                credentials: "include"
+            })
+
+            const data = await response.json();
+
+            setPortfolios(data.message.portfolios);
+        }
+
         getPortfolios()
-    }), []
+
+    }, [])
 
     if (!portfolioChosen) {
-    return (
-        <div>
-            <h1>Gnail Trades</h1>
-            <Button type="button" onClick={() => console.log(portfolios)}>
-                Logout
-            </Button>
+        return (
             <div>
-                <Card.Root size="sm">
-                    <Card.Header>
-                        <Heading size="md"> My Portfolios</Heading>
-                        <Card.Description>Check how your portfolios are doing or select a portfolio to view/trade stocks</Card.Description>
-                    </Card.Header>
-                    <Card.Body color="fg.muted">
-                        <Table.ScrollArea borderWidth="1px" rounded="md" height="160px">
-                            <Table.Root size="sm" stickyHeader>
-                                <Table.Header>
-                                    <Table.Row bg="bg.subtle">
-                                        <Table.ColumnHeader>Portfolio Name</Table.ColumnHeader>
-                                        <Table.ColumnHeader>Total Value</Table.ColumnHeader>
-                                        <Table.ColumnHeader>Starting Capital</Table.ColumnHeader>
-                                        <Table.ColumnHeader>Return</Table.ColumnHeader>
-                                        <Table.ColumnHeader textAlign="end">Cash Available</Table.ColumnHeader>
-                                    </Table.Row>
-                                </Table.Header>
-
-                                <Table.Body>
-                                    {portfolios.map((portfolio) => (
-                                        <Table.Row key={portfolio.id} onClick={() => choosePortfolio(portfolio.id)}>
-                                            <Table.Cell>{portfolio.name}</Table.Cell>
-                                            <Table.Cell>{portfolio.total_value}</Table.Cell>
-                                            <Table.Cell>{portfolio.starting_capital}</Table.Cell>
-                                            <Table.Cell>{(portfolio.total_value-portfolio.starting_capital)/portfolio.starting_capital}</Table.Cell>
-                                            <Table.Cell textAlign="end">{}</Table.Cell>
+                <h1>Gnail Trades</h1>
+                <Button type="button" onClick={() => console.log(portfolios)}>
+                    Logout
+                </Button>
+                <div>
+                    <Card.Root size="sm">
+                        <Card.Header>
+                            <Heading size="md"> My Portfolios</Heading>
+                            <Card.Description>Check how your portfolios are doing or select a portfolio to view/trade stocks</Card.Description>
+                        </Card.Header>
+                        <Card.Body color="fg.muted">
+                            <Table.ScrollArea borderWidth="1px" rounded="md" height="160px">
+                                <Table.Root size="sm" stickyHeader>
+                                    <Table.Header>
+                                        <Table.Row bg="bg.subtle">
+                                            <Table.ColumnHeader>Portfolio Name</Table.ColumnHeader>
+                                            <Table.ColumnHeader>Total Value</Table.ColumnHeader>
+                                            <Table.ColumnHeader>Starting Capital</Table.ColumnHeader>
+                                            <Table.ColumnHeader>Return</Table.ColumnHeader>
+                                            <Table.ColumnHeader textAlign="end">Cash Available</Table.ColumnHeader>
                                         </Table.Row>
-                                    ))}
-                                </Table.Body>
-                            </Table.Root>
-                        </Table.ScrollArea>
-                        <Create/>
-                    </Card.Body>
-                </Card.Root>
+                                    </Table.Header>
+
+                                    <Table.Body>
+                                        {portfolios.map((portfolio) => (
+                                            <Table.Row key={portfolio.id} onClick={() => choosePortfolio(portfolio.id)}>
+                                                <Table.Cell>{portfolio.name}</Table.Cell>
+                                                <Table.Cell>{portfolio.total_value}</Table.Cell>
+                                                <Table.Cell>{portfolio.starting_capital}</Table.Cell>
+                                                <Table.Cell>{(portfolio.total_value - portfolio.starting_capital) / portfolio.starting_capital}</Table.Cell>
+                                                <Table.Cell textAlign="end">{}</Table.Cell>
+                                            </Table.Row>
+                                        ))}
+                                    </Table.Body>
+                                </Table.Root>
+                            </Table.ScrollArea>
+                            <Create />
+                        </Card.Body>
+                    </Card.Root>
+                </div>
+                <Search />
             </div>
-            <Search/>
-        </div>
-    );
+        );
     }
 
     return (
@@ -122,7 +127,7 @@ export default function Dashboard() {
                     <Card.Header>
                         <Heading size="md">{currentPortfolio.name}'s Stocks</Heading>
                         <Card.Description>View your portfolio's stocks or buy/sell stocks using the buttons below</Card.Description>
-                        <Delete/>
+                        <Delete />
                         <Button type="button" className="max-w-40" onClick={() => setPortfolioChosen(false)}>
                             Back to Portfolios
                         </Button>
@@ -143,7 +148,7 @@ export default function Dashboard() {
                                     {currentPortfolio.stocks.map((stock) => (
                                         <Table.Row>
                                             <Table.Cell>{stock.ticker}</Table.Cell>
-                                            <Table.Cell>{stock.value/stock.amount}</Table.Cell>
+                                            <Table.Cell>{stock.value / stock.amount}</Table.Cell>
                                             <Table.Cell>{stock.amount}</Table.Cell>
                                             <Table.Cell>{stock.value}%</Table.Cell>
                                         </Table.Row>
@@ -151,12 +156,12 @@ export default function Dashboard() {
                                 </Table.Body>
                             </Table.Root>
                         </Table.ScrollArea>
-                        <Buy/>
-                        <Sell/>
+                        <Buy />
+                        <Sell />
                     </Card.Body>
                 </Card.Root>
             </div>
-            <Search/>
+            <Search />
         </div>
     );
 }
