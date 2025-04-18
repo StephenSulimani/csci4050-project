@@ -1,19 +1,20 @@
 import { Button, CloseButton, Dialog, Portal, Fieldset, Field, Input } from "@chakra-ui/react"
 import { propagateServerField } from "next/dist/server/lib/render-server";
+import { useState } from 'react'
 
 export default function Buy(props: any) {
 
-    const ticker = (document.getElementsByName('ticker')[0] as HTMLInputElement)
-    const amount = (document.getElementsByName('numShared')[0] as HTMLInputElement)
+    const [ticker, setTicker] = useState('')
+    const [amount, setAmount] = useState('')
 
     const buyStock = async (id: any) => {
-        const response = await fetch(`../api/portfolio/order`, {
+        const response = await fetch(`/api/portfolio/order`, {
           method: 'Post',
           credentials: "include",
           body: JSON.stringify({
-            ticker: ticker.value,
+            ticker: ticker,
             type: 'BUY',
-            amount: ticker.value,
+            amount: amount,
             portfolio_id: id
           })
         });
@@ -21,6 +22,7 @@ export default function Buy(props: any) {
         if (response.ok) {
           // Handle successful buy
           console.log('Stock has been purchased!');
+          props.updateState(true)
         } else {
           // Handle error
           console.error('Failed to buy stock');
@@ -47,12 +49,12 @@ export default function Buy(props: any) {
 
                                     <Field.Root>
                                         <Field.Label>Ticker</Field.Label>
-                                        <Input name="ticker" type="text" />
+                                        <Input name="ticker" type="text" onChange={event => setTicker(event.target.value)}/>
                                     </Field.Root>
 
                                     <Field.Root>
                                         <Field.Label>Number of Shares</Field.Label>
-                                        <Input name="numShares" type="number" />
+                                        <Input name="numShares" type="number" onChange={event => setAmount(event.target.value)}/>
                                     </Field.Root>
                                 </Fieldset.Content>
 
@@ -62,7 +64,9 @@ export default function Buy(props: any) {
                             <Dialog.ActionTrigger asChild>
                                 <Button variant="outline">Cancel</Button>
                             </Dialog.ActionTrigger>
-                            <Button onClick={() => buyStock(props.id)}>Submit</Button>
+                            <Dialog.ActionTrigger asChild>
+                                <Button onClick={() => buyStock(props.id)}>Submit</Button>
+                            </Dialog.ActionTrigger>
                         </Dialog.Footer>
                         <Dialog.CloseTrigger asChild>
                             <CloseButton size="sm" />

@@ -3,10 +3,8 @@ import { useRouter } from 'next/navigation'
 
 export default function Delete(props: any) {
 
-  const router = useRouter();
-
   const deletePortfolio = async (id: any) => {
-    const response = await fetch(`../api/portfolio/${id}`, {
+    const response = await fetch(`/api/portfolio/${id}`, {
       method: 'DELETE',
       credentials: "include"
     });
@@ -14,7 +12,7 @@ export default function Delete(props: any) {
     if (response.ok) {
       // Handle successful deletion
       console.log('Portfolio deleted!');
-      router.push('../')
+      props.updateState(false)
     } else {
       // Handle error
       console.error('Failed to delete portfolio');
@@ -39,7 +37,9 @@ export default function Delete(props: any) {
               <Dialog.ActionTrigger asChild>
                 <Button variant="outline">No</Button>
               </Dialog.ActionTrigger>
-              <Button onClick={() => deletePortfolio(props.id)}>Yes</Button>
+              <Dialog.ActionTrigger asChild>
+                <Button onClick={() => deletePortfolio(props.id)}>Yes</Button>
+              </Dialog.ActionTrigger>
             </Dialog.Footer>
             <Dialog.CloseTrigger asChild>
               <CloseButton size="sm" />

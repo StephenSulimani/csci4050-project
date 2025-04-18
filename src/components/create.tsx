@@ -1,23 +1,25 @@
 import { Button, CloseButton, Dialog, Portal, Fieldset, Field, Input } from "@chakra-ui/react"
+import { useState } from 'react'
 
-export default function Create() {
+export default function Create(props: any) {
 
-    const nameInput = (document.getElementsByName('portfolioName')[0] as HTMLInputElement)
-    const startingCapital = (document.getElementsByName('startingCapital')[0] as HTMLInputElement)
+    const [name, setName] = useState('')
+    const [capital, setCapital] = useState('')
 
     const createPortfolio = async () => {
-        const response = await fetch(`../api/portfolio/`, {
+        const response = await fetch(`/api/portfolio/`, {
           method: 'PUT',
           credentials: "include",
           body: JSON.stringify({
-            name: nameInput.value,
-            starting_Capital: startingCapital.value
+            name: name,
+            starting_Capital: capital
           })
         });
     
         if (response.ok) {
           // Handle successful creation
           console.log('Portfolio created!');
+          props.updateState(false)
         } else {
           // Handle error
           console.error('Failed to create portfolio');
@@ -44,12 +46,12 @@ export default function Create() {
 
                                     <Field.Root>
                                         <Field.Label>Portfolio Name</Field.Label>
-                                        <Input name="portfolioName" type="text" />
+                                        <Input name="portfolioName" type="text" onChange={event => setName(event.target.value)}/>
                                     </Field.Root>
 
                                     <Field.Root>
                                         <Field.Label>Starting Capital</Field.Label>
-                                        <Input name="startingCapital" type="number" />
+                                        <Input name="startingCapital" type="number" onChange={event => setCapital(event.target.value)}/>
                                     </Field.Root>
                                 </Fieldset.Content>
 
@@ -59,7 +61,9 @@ export default function Create() {
                             <Dialog.ActionTrigger asChild>
                                 <Button variant="outline">Cancel</Button>
                             </Dialog.ActionTrigger>
-                            <Button>Submit</Button>
+                            <Dialog.ActionTrigger asChild>
+                                <Button onClick={() => createPortfolio()}>Submit</Button>
+                            </Dialog.ActionTrigger>
                         </Dialog.Footer>
                         <Dialog.CloseTrigger asChild>
                             <CloseButton size="sm" />

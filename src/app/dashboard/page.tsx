@@ -28,6 +28,12 @@ export default function Dashboard() {
     }
 
     const [portfolioChosen, setPortfolioChosen] = useState(false);
+    const [statusChanged, setStatusChanged] = useState(false)
+
+    const updateState = (setChosen: boolean) => {
+        setPortfolioChosen(setChosen)
+        setStatusChanged(!statusChanged)
+    }
 
     const [portfolios, setPortfolios] = useState<IPortfolio[]>([])
 
@@ -43,8 +49,6 @@ export default function Dashboard() {
         }],
         total_value: 0
     });
-
-
 
     function choosePortfolio(id: any) {
         console.log(`ID: ${id} | Portfolio Len: ${portfolios.length}`);
@@ -66,13 +70,20 @@ export default function Dashboard() {
 
         getPortfolios()
 
-    }, [])
+    }, [statusChanged])
+
+    const logout = async () => {
+        // const response = await fetch(`/logout`, {
+        //     method: 'GET',
+        //     credentials: "include"
+        // })
+    }
 
     if (!portfolioChosen) {
         return (
             <div>
                 <h1>Gnail Trades</h1>
-                <Button type="button" onClick={() => console.log(portfolios)}>
+                <Button type="button" onClick={() => logout()}>
                     Logout
                 </Button>
                 <div>
@@ -98,16 +109,16 @@ export default function Dashboard() {
                                         {portfolios.map((portfolio) => (
                                             <Table.Row key={portfolio.id} onClick={() => choosePortfolio(portfolio.id)}>
                                                 <Table.Cell>{portfolio.name}</Table.Cell>
-                                                <Table.Cell>{portfolio.total_value}</Table.Cell>
+                                                <Table.Cell>{portfolio.total_value.toFixed(2)}</Table.Cell>
                                                 <Table.Cell>{portfolio.starting_capital}</Table.Cell>
-                                                <Table.Cell>{(portfolio.total_value - portfolio.starting_capital) / portfolio.starting_capital}</Table.Cell>
-                                                <Table.Cell textAlign="end">{}</Table.Cell>
+                                                <Table.Cell>{((portfolio.total_value - portfolio.starting_capital) / portfolio.starting_capital).toFixed(2)}%</Table.Cell>
+                                                <Table.Cell textAlign="end">{portfolio.cash}</Table.Cell>
                                             </Table.Row>
                                         ))}
                                     </Table.Body>
                                 </Table.Root>
                             </Table.ScrollArea>
-                            <Create />
+                            <Create updateState={updateState}/>
                         </Card.Body>
                     </Card.Root>
                 </div>
@@ -119,7 +130,7 @@ export default function Dashboard() {
     return (
         <div>
             <h1>Gnail Trades</h1>
-            <Button type="button">
+            <Button type="button" onClick={() => logout()}>
                 Logout
             </Button>
             <div>
@@ -127,7 +138,7 @@ export default function Dashboard() {
                     <Card.Header>
                         <Heading size="md">{currentPortfolio.name}'s Stocks</Heading>
                         <Card.Description>View your portfolio's stocks or buy/sell stocks using the buttons below</Card.Description>
-                        <Delete />
+                        <Delete id={currentPortfolio.id} updateState={updateState}/>
                         <Button type="button" className="max-w-40" onClick={() => setPortfolioChosen(false)}>
                             Back to Portfolios
                         </Button>
@@ -150,14 +161,14 @@ export default function Dashboard() {
                                             <Table.Cell>{stock.ticker}</Table.Cell>
                                             <Table.Cell>{stock.value / stock.amount}</Table.Cell>
                                             <Table.Cell>{stock.amount}</Table.Cell>
-                                            <Table.Cell>{stock.value}%</Table.Cell>
+                                            <Table.Cell>{stock.value}</Table.Cell>
                                         </Table.Row>
                                     ))}
                                 </Table.Body>
                             </Table.Root>
                         </Table.ScrollArea>
-                        <Buy />
-                        <Sell />
+                        <Buy id={currentPortfolio} updateState={updateState}/>
+                        <Sell id={currentPortfolio} updateState={updateState}/>
                     </Card.Body>
                 </Card.Root>
             </div>

@@ -1,18 +1,19 @@
 import { Button, CloseButton, Dialog, Portal, Fieldset, Field, Input } from "@chakra-ui/react"
+import { useState } from 'react'
 
 export default function Sell(props: any) {
 
-    const ticker = (document.getElementsByName('ticker')[0] as HTMLInputElement)
-    const amount = (document.getElementsByName('numShared')[0] as HTMLInputElement)
+    const [ticker, setTicker] = useState('')
+    const [amount, setAmount] = useState('')
 
     const sellStock = async (id: any) => {
-        const response = await fetch(`../api/portfolio/order`, {
+        const response = await fetch(`/api/portfolio/order`, {
           method: 'Post',
           credentials: "include",
           body: JSON.stringify({
-            ticker: ticker.value,
+            ticker: ticker,
             type: 'Sell',
-            amount: amount.value,
+            amount: amount,
             portfolio_id: id
           })
         });
@@ -20,6 +21,7 @@ export default function Sell(props: any) {
         if (response.ok) {
           // Handle successful buy
           console.log('Stock has been sold!');
+          props.updateState(true)
         } else {
           // Handle error
           console.error('Failed to sell stock');
@@ -46,12 +48,12 @@ export default function Sell(props: any) {
 
                                     <Field.Root>
                                         <Field.Label>Ticker</Field.Label>
-                                        <Input name="ticker" type="text" />
+                                        <Input name="ticker" type="text" onChange={event => setTicker(event.target.value)}/>
                                     </Field.Root>
 
                                     <Field.Root>
                                         <Field.Label>Number of Shares</Field.Label>
-                                        <Input name="numShares" type="number" />
+                                        <Input name="numShares" type="number" onChange={event => setAmount(event.target.value)}/>
                                     </Field.Root>
                                 </Fieldset.Content>
 
@@ -61,7 +63,9 @@ export default function Sell(props: any) {
                             <Dialog.ActionTrigger asChild>
                                 <Button variant="outline">Cancel</Button>
                             </Dialog.ActionTrigger>
-                            <Button onClick={() => sellStock(props.id)}>Submit</Button>
+                            <Dialog.ActionTrigger asChild>
+                                <Button onClick={() => sellStock(props.id)}>Submit</Button>
+                            </Dialog.ActionTrigger>
                         </Dialog.Footer>
                         <Dialog.CloseTrigger asChild>
                             <CloseButton size="sm" />
