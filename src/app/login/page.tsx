@@ -1,11 +1,13 @@
 'use client'
 
-import { Button, Card, Field, Input, Stack, Fieldset, Spinner } from "@chakra-ui/react"
+import { Button, Card, Field, Input, Stack, Fieldset, Spinner, Box } from "@chakra-ui/react"
 
 import { useRouter } from 'next/navigation'
 import { useAuth } from "../contexts/AuthContext";
 import { useEffect, useState } from "react";
+import { Space_Grotesk } from "next/font/google";
 
+const spaceGrotesk = Space_Grotesk({subsets: ['latin']});
 export default function Login() {
     const [name, setName] = useState('');
     const [email, setEmail] = useState('');
@@ -24,9 +26,27 @@ export default function Login() {
 
     if (registerPage) {
         return (
+            <Box
+                display="flex"
+                justifyContent="center"
+                alignItems="center"
+                height="100vh"
+                bgImage="url('Stockpic.png')"
+                bgSize="cover"
+                bgPos="center"
+                bgRepeat="no-repeat"
+                fontFamily={spaceGrotesk.style.fontFamily}
+            >
+            <Box
+            position = "absolute"
+            top="0"
+            left="0"
+            right="0"
+            bottom="0"
+            backgroundColor="rgba(0, 0, 0, 0.2)"
+            />
             <div className="grid place-items-center h-screen">
                 <div className="w-full max-w-md">
-
                     <Card.Root maxW="sm">
                         <Card.Header>
                             <Card.Title>Register</Card.Title>
@@ -68,7 +88,7 @@ export default function Login() {
                     </Card.Root>
                 </div>
             </div>
-
+            </Box>
         )
     }
 
