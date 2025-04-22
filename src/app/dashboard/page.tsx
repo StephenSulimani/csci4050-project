@@ -2,13 +2,12 @@
 
 import { Button, Card, Heading, Input } from "@chakra-ui/react"
 import { Table } from "@chakra-ui/react"
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import Delete from '../../components/delete'
-import Buy from '../../components/buy'
-import Sell from '../../components/sell'
 import Create from '../../components/create'
 import Search from '../../components/search'
 import { IPortfolio } from "../api/portfolio/route"
+import Order from "@/components/OrderModal"
 
 export default function Dashboard() {
 
@@ -51,12 +50,23 @@ export default function Dashboard() {
     });
 
     function choosePortfolio(id: any) {
+        if (!id) {
+            return;
+        }
         console.log(`ID: ${id} | Portfolio Len: ${portfolios.length}`);
-        setCurrentPortfolio(portfolios.filter(portfolio => portfolio.id === id)[0])
-        setPortfolioChosen(true);
+        const port = portfolios.filter(portfolio => portfolio.id === id)[0]
+        if (port) {
+            setCurrentPortfolio(port);
+            setPortfolioChosen(true);
+        }
     }
 
+    const choosePort = useCallback((id: any) => {
+        choosePortfolio(id)
+    }, [])
+
     useEffect(() => {
+        console.log("called");
         const getPortfolios = async () => {
             const response = await fetch(`/api/portfolio`, {
                 method: 'GET',
@@ -66,11 +76,23 @@ export default function Dashboard() {
             const data = await response.json();
 
             setPortfolios(data.message.portfolios);
+
+            console.log(data.message.portfolios);
+
+            if (currentPortfolio.id) {
+                const selected_port = data.message.portfolios.filter(portfolio => portfolio.id === currentPortfolio.id)[0]
+                setCurrentPortfolio(selected_port)
+            }
         }
 
         getPortfolios()
 
-    }, [statusChanged])
+    }, [statusChanged, choosePort])
+
+    useEffect(() => {
+        console.log("CurrentPortfolio Changed!")
+        console.log(currentPortfolio)
+    }, [currentPortfolio])
 
     const logout = async () => {
         // const response = await fetch(`/logout`, {
@@ -118,7 +140,7 @@ export default function Dashboard() {
                                     </Table.Body>
                                 </Table.Root>
                             </Table.ScrollArea>
-                            <Create updateState={updateState}/>
+                            <Create updateState={updateState} />
                         </Card.Body>
                     </Card.Root>
                 </div>
@@ -138,7 +160,7 @@ export default function Dashboard() {
                     <Card.Header>
                         <Heading size="md">{currentPortfolio.name}'s Stocks</Heading>
                         <Card.Description>View your portfolio's stocks or buy/sell stocks using the buttons below</Card.Description>
-                        <Delete id={currentPortfolio.id} updateState={updateState}/>
+                        <Delete id={currentPortfolio.id} updateState={updateState} />
                         <Button type="button" className="max-w-40" onClick={() => setPortfolioChosen(false)}>
                             Back to Portfolios
                         </Button>
@@ -167,8 +189,8 @@ export default function Dashboard() {
                                 </Table.Body>
                             </Table.Root>
                         </Table.ScrollArea>
-                        <Buy id={currentPortfolio} updateState={updateState}/>
-                        <Sell id={currentPortfolio} updateState={updateState}/>
+                        <Order id={currentPortfolio.id} orderType="BUY" updateState={updateState} />
+                        <Order id={currentPortfolio.id} orderType="SELL" updateState={updateState} />
                     </Card.Body>
                 </Card.Root>
             </div>

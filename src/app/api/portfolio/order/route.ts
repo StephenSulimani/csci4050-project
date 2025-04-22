@@ -104,6 +104,7 @@ export const POST = async (req: NextRequest) => {
             message: "Order issued successfully",
         })
     } catch (error: unknown) {
+        console.log(error)
         return NextResponse.json({
             status: 0,
             error: 1,

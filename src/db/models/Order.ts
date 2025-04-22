@@ -11,7 +11,6 @@ export default class Order extends Model<Order> {
     declare public id: string;
 
     @Validate({
-        isAlphanumeric: true,
         len: [1, 10]
     })
     @Column({

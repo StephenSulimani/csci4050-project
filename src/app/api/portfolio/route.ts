@@ -57,7 +57,7 @@ export const GET = async (req: NextRequest) => {
                 "id": portfolio.dataValues.id,
                 "starting_capital": portfolio.dataValues.startingCapital,
                 "cash": cash,
-                "stocks": stocks,
+                "stocks": stocks.filter((stock) => stock.amount > 0),
                 "total_value": total_value
             })
 
