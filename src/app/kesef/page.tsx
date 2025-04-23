@@ -263,37 +263,31 @@ function PortfolioView(props: { portfolio: IPortfolio, mainMenu: () => void, upd
     const [activeTab, setActiveTab] = useState("holdings")
     const [buyOpen, setBuyOpen] = useState(false);
     const [sellOpen, setSellOpen] = useState(false);
-    const [buyPerOpen, setBuyPerOpen] = useState(
+    const [buyPerOpen, setBuyPerOpen] = useState<{ [key: string]: boolean }>(
         portfolio.stocks.reduce((acc, item) => {
-            acc[item.ticker] = false;
+            acc[`${item.ticker}`] = false;
             return acc;
-        })
+        }, {})
     );
-    const [sellPerOpen, setSellPerOpen] = useState(
+    const [sellPerOpen, setSellPerOpen] = useState<{ [key: string]: boolean }>(
         portfolio.stocks.reduce((acc, item) => {
-            acc[item.ticker] = false;
+            acc[`${item.ticker}`] = false;
             return acc;
-        })
+        }, {})
     );
 
-    const updateSellPerOpen = (ticker: str) => {
-        const updated = sellPerOpen;
-        // If ticker is in updated
-        if (updated[ticker]) {
-            updated[ticker] = !updated[ticker];
-
-        }
-
-        setSellPerOpen(updated);
+    const updateSellPerOpen = (ticker: string, val: boolean) => {
+        setSellPerOpen(prevState => ({
+            ...prevState,
+            [ticker]: val
+        }))
     }
 
-    const updateBuyPerOpen = (ticker: str) => {
-        const updated = buyPerOpen;
-        if (updated[ticker]) {
-
-            updated[ticker] = !updated[ticker];
-        }
-        setBuyPerOpen(updated);
+    const updateBuyPerOpen = (ticker: string, val: boolean) => {
+        setBuyPerOpen(prevState => ({
+            ...prevState,
+            [ticker]: val
+        }))
     }
 
     const { updateState } = props;
@@ -433,7 +427,7 @@ function PortfolioView(props: { portfolio: IPortfolio, mainMenu: () => void, upd
                                             <DialogTitle>Buy Stock</DialogTitle>
                                             <DialogDescription>Place a buy order for a stock in your portfolio.</DialogDescription>
                                         </DialogHeader>
-                                        <BuyOrderForm portfolioId={portfolio.id} defaultTicker="IBM" close={() => { updateState(); setBuyOpen(false) }} />
+                                        <BuyOrderForm portfolioId={portfolio.id} defaultTicker="IBM" close={() => { setBuyOpen(false); updateState(); }} />
                                     </DialogContent>
                                 </Dialog>
                                 <Dialog open={sellOpen} onOpenChange={setSellOpen}>
@@ -445,7 +439,7 @@ function PortfolioView(props: { portfolio: IPortfolio, mainMenu: () => void, upd
                                             <DialogTitle>Sell Stock</DialogTitle>
                                             <DialogDescription>Place a sell order for a stock in your portfolio.</DialogDescription>
                                         </DialogHeader>
-                                        <SellOrderForm portfolioId={portfolio.id} holdings={portfolio.stocks} close={() => { updateState(); setSellOpen(false) }} />
+                                        <SellOrderForm portfolioId={portfolio.id} holdings={portfolio.stocks} close={() => { setSellOpen(false); updateState(); }} />
                                     </DialogContent>
                                 </Dialog>
                             </div>
@@ -477,7 +471,7 @@ function PortfolioView(props: { portfolio: IPortfolio, mainMenu: () => void, upd
                                                         <TableCell>${(holding.value / holding.amount).toFixed(2)}</TableCell>
                                                         <TableCell>
                                                             <div className="flex gap-2">
-                                                                <Dialog open={buyPerOpen[holding.ticker]} onOpenChange={() => updateBuyPerOpen(holding.ticker)}>
+                                                                <Dialog open={buyPerOpen[holding.ticker]} onOpenChange={(c) => updateBuyPerOpen(holding.ticker, c)}>
                                                                     <DialogTrigger asChild>
                                                                         <Button variant="outline" size="sm">
                                                                             Buy
@@ -491,11 +485,11 @@ function PortfolioView(props: { portfolio: IPortfolio, mainMenu: () => void, upd
                                                                         <BuyOrderForm
                                                                             portfolioId={portfolio.id}
                                                                             defaultTicker={holding.ticker}
-                                                                            close={() => { updateState(); updateBuyPerOpen(holding.ticker); }}
+                                                                            close={() => { updateBuyPerOpen(holding.ticker, false); updateState(); }}
                                                                         />
                                                                     </DialogContent>
                                                                 </Dialog>
-                                                                <Dialog open={sellPerOpen[holding.ticker]} onOpenChange={() => setSellPerOpen(holding.ticker)}>
+                                                                <Dialog open={sellPerOpen[holding.ticker]} onOpenChange={(c) => { updateSellPerOpen(holding.ticker, c) }}>
                                                                     <DialogTrigger asChild>
                                                                         <Button variant="outline" size="sm">
                                                                             Sell
@@ -510,7 +504,7 @@ function PortfolioView(props: { portfolio: IPortfolio, mainMenu: () => void, upd
                                                                             portfolioId={portfolio.id}
                                                                             holdings={portfolio.stocks}
                                                                             defaultTicker={holding.ticker}
-                                                                            close={() => { updateState(); updateSellPerOpen(holding.ticker) }}
+                                                                            close={() => { updateSellPerOpen(holding.ticker, false); updateState(); }}
                                                                         />
                                                                     </DialogContent>
                                                                 </Dialog>
