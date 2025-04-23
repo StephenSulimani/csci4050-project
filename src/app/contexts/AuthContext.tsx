@@ -8,7 +8,7 @@ interface IUser {
     email: string;
 }
 
-interface IAuthContext {
+export interface IAuthContext {
     user: IUser | null;
     loggedIn: boolean;
     loading: boolean;
