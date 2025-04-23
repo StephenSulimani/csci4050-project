@@ -8,8 +8,15 @@ import Create from '../../components/create'
 import Search from '../../components/search'
 import { IPortfolio } from "../api/portfolio/route"
 import Order from "@/components/OrderModal"
+import { Router } from "lucide-react"
+import { useRouter } from 'next/navigation'
+import { useAuth } from "../contexts/AuthContext";
 
 export default function Dashboard() {
+
+    const router = useRouter()
+
+    const auth = useAuth()
 
     interface portfolio {
         name: string,
@@ -95,10 +102,8 @@ export default function Dashboard() {
     }, [currentPortfolio])
 
     const logout = async () => {
-        // const response = await fetch(`/logout`, {
-        //     method: 'GET',
-        //     credentials: "include"
-        // })
+        auth.logout()
+        router.push('/')
     }
 
     if (!portfolioChosen) {
