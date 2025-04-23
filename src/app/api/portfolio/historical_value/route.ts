@@ -21,7 +21,7 @@ export const GET = async (req: NextRequest, { params }: { params: { portfolio_id
 
         const startDate = await getStartDate(user_id);
         const endDate = new Date().setDate(new Date().getDate() + 1);
-        const historicalValues = await getHistoricalPortfolioValue(user_id, startDate, endDate, portfolio_id);
+        const historicalValues = await getHistoricalPortfolioValue(portfolio_id, startDate, endDate);
 
         return NextResponse.json({
             status: 1,
@@ -41,10 +41,10 @@ export const GET = async (req: NextRequest, { params }: { params: { portfolio_id
     }
 }
 
-const getFirstOrderDate = async (user_id: string) => {
+const getFirstOrderDate = async (portfolio_id: string) => {
     const orders = await Order.findAll({
         where: {
-            user_id: user_id
+            portfolio_id: portfolio_id
         },
         order: [['datetime', 'ASC']],
         limit: 1
@@ -67,7 +67,7 @@ const getStartDate = async (user_id: string) => {
 }
 
 
-const getHistoricalPortfolioValue = async (user_id: string, startDate: Date, endDate: Date, portfolio_id: string): Promise<{ [date: string]: number}> => {
+const getHistoricalPortfolioValue = async (portfolio_id: string, startDate: Date, endDate: Date): Promise<{ [date: string]: number}> => {
     const historicalValues: { [date: string]: number } = {};
     const orders = await Order.findAll({
         where: {
