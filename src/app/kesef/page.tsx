@@ -1,7 +1,7 @@
 "use client"
 
 import Link from "next/link"
-import { ArrowUpRight, DollarSign, TrendingUp, Wallet, ArrowLeft, LineChart, Plus, Trash } from "lucide-react"
+import { ArrowUpRight, DollarSign, TrendingUp, Wallet, ArrowLeft, LineChart, Plus, Trash, Loader2 } from "lucide-react"
 
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
@@ -23,6 +23,7 @@ import { PortfolioChart } from "@/components/portfolio-chart"
 import { BuyOrderForm } from "@/components/buy-order-form"
 import { SellOrderForm } from "@/components/sell-order-form"
 import { CreatePortfolioForm } from "@/components/create-portfolio-form"
+import Header from "@/components/Header"
 
 const totalReturn = (portfolio: IPortfolio) => {
     return ((portfolio.total_value - portfolio.starting_capital) / portfolio.starting_capital) * 100
@@ -42,6 +43,7 @@ export default function DashboardPage() {
     }, [auth.loggedIn, auth.loading, router])
 
     const [portfolios, setPortfolios] = useState<IPortfolio[]>([]);
+    const [loading, setLoading] = useState(false);
     const [currentPortfolio, setCurrentPortfolio] = useState<IPortfolio | null>(null);
 
     const [deleteSemaphore, setDeleteSemaphore] = useState(false);
@@ -50,15 +52,16 @@ export default function DashboardPage() {
 
     useEffect(() => {
         async function fetchPortfolios() {
+            setLoading(true);
             const response = await fetch('/api/portfolio', {
                 method: 'GET',
                 credentials: "include"
             });
             const data = await response.json();
             setPortfolios(data.message.portfolios);
+            setLoading(false);
         }
         fetchPortfolios();
-        console.log('fetching portfolios!')
     }, [open, deleteSemaphore])
 
     useEffect(() => {
@@ -91,27 +94,23 @@ export default function DashboardPage() {
 
     if (showingPortfolio && currentPortfolio) {
         return (
-            <PortfolioView portfolio={currentPortfolio} mainMenu={mainMenu} updateState={() => setDeleteSemaphore(!deleteSemaphore)} />
+            <div className="flex min-h-screen flex-col">
+                <Header auth={auth} active="dashboard" />
+                <PortfolioView portfolio={currentPortfolio} mainMenu={mainMenu} updateState={() => setDeleteSemaphore(!deleteSemaphore)} />
+            </div>
         )
     }
+
+    if (auth.loading || loading) {
+        // Optional: Render a full-page spinner or skeleton while checking auth status
+        return <div className="flex items-center justify-center h-screen"><Loader2 className="h-8 w-8 animate-spin" /></div>;
+    }
+
 
 
     return (
         <div className="flex min-h-screen flex-col">
-            <header className="sticky top-0 z-10 flex h-16 items-center gap-4 border-b bg-background px-4 md:px-6">
-                <div className="flex items-center gap-2 font-semibold">
-                    <Wallet className="h-6 w-6" />
-                    <span>Gnail Trades</span>
-                </div>
-                <nav className="ml-auto flex gap-2">
-                    <Button asChild variant="ghost" size="sm">
-                        <Link href="/research">Research</Link>
-                    </Button>
-                    <Button asChild variant="ghost" size="sm">
-                        <Link href="/">Portfolios</Link>
-                    </Button>
-                </nav>
-            </header>
+            <Header auth={auth} active="dashboard" />
             <main className="flex-1 p-4 md:p-6">
                 <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
                     <Card>
@@ -308,21 +307,7 @@ function PortfolioView(props: { portfolio: IPortfolio, mainMenu: () => void, upd
     }, [buyOpen, sellOpen, sellPerOpen, buyPerOpen])
 
     return (
-        <div className="flex min-h-screen flex-col">
-            <header className="sticky top-0 z-10 flex h-16 items-center gap-4 border-b bg-background px-4 md:px-6">
-                <div className="flex items-center gap-2 font-semibold">
-                    <Wallet className="h-6 w-6" />
-                    <span>Gnail Trades</span>
-                </div>
-                <nav className="ml-auto flex gap-2">
-                    <Button asChild variant="ghost" size="sm">
-                        <Link href="/research">Research</Link>
-                    </Button>
-                    <Button asChild variant="ghost" size="sm">
-                        <Link href="/">Portfolios</Link>
-                    </Button>
-                </nav>
-            </header>
+        <div className="">
             <div className="flex items-center gap-4 border-b bg-muted/40 px-4 py-3 md:px-6">
                 <Button asChild variant="ghost" size="icon" onClick={props.mainMenu}>
                     <div>

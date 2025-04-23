@@ -9,7 +9,6 @@ import { Button } from "@/components/ui/button"
 import { DialogFooter } from "@/components/ui/dialog"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Spinner } from "./ui/spinner"
 
 export function CreatePortfolioForm({ close }: { close: () => void; }) {
@@ -27,7 +26,7 @@ export function CreatePortfolioForm({ close }: { close: () => void; }) {
             credentials: "include",
             body: JSON.stringify({
                 name: portfolioName,
-                starting_Capital: startingCapital
+                starting_capital: startingCapital
             })
         });
 

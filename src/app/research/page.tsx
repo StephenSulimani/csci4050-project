@@ -10,6 +10,8 @@ import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { StockChart } from "@/components/stock-chart"
+import { useAuth } from "../contexts/AuthContext"
+import Header from "@/components/Header"
 
 export default function ResearchPage() {
     const [searchQuery, setSearchQuery] = useState("")
@@ -18,6 +20,8 @@ export default function ResearchPage() {
         price: 0,
         change: 0
     });
+
+    const auth = useAuth();
 
     // Mock stock data
     const popularStocks = [
@@ -50,20 +54,7 @@ export default function ResearchPage() {
 
     return (
         <div className="flex min-h-screen flex-col">
-            <header className="sticky top-0 z-10 flex h-16 items-center gap-4 border-b bg-background px-4 md:px-6">
-                <div className="flex items-center gap-2 font-semibold">
-                    <Wallet className="h-6 w-6" />
-                    <span>Gnail Trades</span>
-                </div>
-                <nav className="ml-auto flex gap-2">
-                    <Button asChild variant="ghost" size="sm">
-                        <Link href="/research">Research</Link>
-                    </Button>
-                    <Button asChild variant="ghost" size="sm">
-                        <Link href="/">Portfolios</Link>
-                    </Button>
-                </nav>
-            </header>
+            <Header auth={auth} active="research" />
             <main className="flex-1 p-4 md:p-6">
                 <h1 className="text-2xl font-bold mb-6">Stock Research</h1>
 

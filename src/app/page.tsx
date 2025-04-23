@@ -27,7 +27,7 @@ export default function Home() {
         // Main container: h-screen, flex, center, background image/size/position/repeat, background color overlay handled separately
         <div
             className={cn(
-                "relative flex h-screen items-center justify-center bg-[url('/Stockpic.png')] bg-[length:1500px_auto] bg-center bg-no-repeat bg-black", // Use Tailwind arbitrary value for size, add bg-black
+                "relative flex h-screen items-center justify-center", // Use Tailwind arbitrary value for size, add bg-black
                 spaceGrotesk.variable // Apply font variable
             )}
             style={{ fontFamily: 'var(--font-space-grotesk)' }} // Apply the font variable (or configure via tailwind.config.js)
@@ -45,7 +45,7 @@ export default function Home() {
                             className={cn("mt-2 text-[40px] text-center", spaceGrotesk.variable)} // Use arbitrary value for size, center text
                             style={{ fontFamily: 'var(--font-space-grotesk)' }} // Apply the font variable
                         >
-                            Welcome to Gnail Trades!
+                            Welcome to Kesef!
                         </CardTitle>
                         <CardDescription className="text-center"> {/* Center description text */}
                             The simple to use trading solution for you! Get started by clicking below to login or create an account!
@@ -55,7 +55,7 @@ export default function Home() {
                     {/* CardFooter: Right align buttons with gap */}
                     <CardFooter className="flex justify-end gap-2 p-6"> {/* Added p-6 for padding */}
                         <Button type="button" onClick={() => router.push('/login')}>Login</Button>
-                        <Button variant="outline" type="button" onClick={() => router.push('/login')}>Register</Button>
+                        <Button variant="outline" type="button" onClick={() => router.push('/login?register=1')}>Register</Button>
                     </CardFooter>
                 </Card>
             </div>
