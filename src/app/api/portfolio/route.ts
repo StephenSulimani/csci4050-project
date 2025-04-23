@@ -9,7 +9,7 @@ interface IPortfolioCreationRequest {
     starting_capital?: number;
 }
 
-type Holding = {
+export type Holding = {
     ticker: string,
     amount: number,
     value: number
