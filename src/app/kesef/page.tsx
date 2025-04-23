@@ -101,7 +101,7 @@ export default function DashboardPage() {
         )
     }
 
-    if (auth.loading || loading) {
+    if (auth.loading || (loading && portfolios.length === 0)) {
         // Optional: Render a full-page spinner or skeleton while checking auth status
         return <div className="flex items-center justify-center h-screen"><Loader2 className="h-8 w-8 animate-spin" /></div>;
     }
@@ -175,7 +175,7 @@ export default function DashboardPage() {
                     </Card>
                 </div>
                 <h2 className="mt-8 mb-4 text-xl font-semibold">Your Portfolios</h2>
-                <Dialog open={open} onOpenChange={(e) => setOpen(e.open)}>
+                <Dialog open={open} onOpenChange={(e) => setOpen(e)}>
                     <DialogTrigger asChild>
                         <Button className="my-3">
                             <Plus className="mr-2 h-4 w-4" />
