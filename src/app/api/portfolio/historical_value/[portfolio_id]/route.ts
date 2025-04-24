@@ -125,16 +125,15 @@ const getHistoricalPortfolioValue = async (startDate: Date, endDate: Date, portf
                 string_date = new Date(new Date(string_date).setDate(new Date(string_date).getDate() - 1)).toISOString().split('T')[0];
             }
 
-            const price = cache[order.ticker][string_date]["4. close"];
 
             if (order.dataValues.type == 'BUY') {
-                cash -= order.dataValues.amount * price;
+                cash -= order.dataValues.amount * order.dataValues.price;
                 if (!holdings[order.dataValues.ticker]) {
                     holdings[order.dataValues.ticker] = 0;
                 }
                 holdings[order.dataValues.ticker] += order.dataValues.amount;
             } else {
-                cash += order.dataValues.amount * price;
+                cash += order.dataValues.amount * order.dataValues.price;
                 if (!holdings[order.dataValues.ticker]) {
                     holdings[order.dataValues.ticker] = 0;
                 }
@@ -143,6 +142,7 @@ const getHistoricalPortfolioValue = async (startDate: Date, endDate: Date, portf
         }
 
         let value_today = cash;
+
 
         for (const [ticker, amt] of Object.entries(holdings)) {
             let string_date = new Date(date).toISOString().split('T')[0];
@@ -153,6 +153,7 @@ const getHistoricalPortfolioValue = async (startDate: Date, endDate: Date, portf
 
             value_today += amt * cache[ticker][string_date]["4. close"];
         }
+
 
         value_map[new Date(date).toISOString().split('T')[0]] = value_today;
 
