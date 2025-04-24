@@ -5,7 +5,7 @@ import { Line, LineChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from "rec
 import { ChartContainer, ChartTooltipContent } from "@/components/ui/chart"
 
 // Generate mock historical data for the portfolio
-const generatePortfolioData = (portfolioId: string) => {
+const generatePortfolioData = async (portfolioId: string) => {
     // Base value depends on the portfolio ID
     const baseValue = portfolioId === "1" ? 10000 : portfolioId === "2" ? 8000 : portfolioId === "3" ? 12000 : 10000
 
@@ -27,6 +27,16 @@ const generatePortfolioData = (portfolioId: string) => {
             value: Math.round(value * 100) / 100,
         })
     }
+
+    const response = await fetch(`/api/portfolio/historical_value/${portfolioId}`, {
+        method: 'GET',
+        credentials: "include",
+    })
+
+    const data2 = await response.json()
+
+    console.log(data2)
+
 
     return data
 }
