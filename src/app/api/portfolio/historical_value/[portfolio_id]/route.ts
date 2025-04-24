@@ -3,6 +3,8 @@ import Order from "@/db/models/Order";
 import { NextRequest, NextResponse } from "next/server";
 import { FinnhubUtils } from "@/app/FinnhubUtils";
 import { Op } from 'sequelize'
+import AlphaV from "@/app/AlphaVantage";
+import Portfolio from "@/db/models/Portfolio";
 
 export const GET = async (req: NextRequest, { params }: { params: { portfolio_id: string } }) => {
     const user_id = req.headers.get('x-user-id')
@@ -21,8 +23,8 @@ export const GET = async (req: NextRequest, { params }: { params: { portfolio_id
         await connect();
 
         const startDate = await getStartDate(portfolio_id);
-        const endDate = new Date().setDate(new Date().getDate() + 1);
-        const historicalValues = await getHistoricalPortfolioValue(user_id, startDate, endDate, portfolio_id);
+        const endDate = new Date();
+        const historicalValues = await getHistoricalPortfolioValue(startDate, endDate, portfolio_id);
 
         return NextResponse.json({
             status: 1,
@@ -68,7 +70,7 @@ const getStartDate = async (portfolio_id: string) => {
 }
 
 
-const getHistoricalPortfolioValue = async (user_id: string, startDate: Date, endDate: Date, portfolio_id: string): Promise<{ [date: string]: number}> => {
+const getHistoricalPortfolioValue = async (startDate: Date, endDate: Date, portfolio_id: string): Promise<{ [date: string]: number }> => {
     const historicalValues: { [date: string]: number } = {};
     const orders = await Order.findAll({
         where: {
@@ -81,19 +83,81 @@ const getHistoricalPortfolioValue = async (user_id: string, startDate: Date, end
         order: [['datetime', 'ASC']]
     });
 
-    for (const order of orders) {
-        const orderData = order.dataValues;
-        const date = new Date(orderData.datetime).toISOString().split('T')[0];
-        const price = await FinnhubUtils.getHistoricalPrice(orderData.ticker, date);
-        if (!historicalValues[date]) {
-            historicalValues[date] = 0;
+    const portfolio = await Portfolio.findOne({
+        where: {
+            id: portfolio_id
         }
-        if (orderData.type === 'BUY') {
-            historicalValues[date] += orderData.amount * price;
-        } else if (orderData.type === 'SELL') {
-            historicalValues[date] -= orderData.amount * price;
-        }
+    })
+
+    const cache = {
+
     }
 
-    return historicalValues;
+    const holdings = {
+
+    }
+
+    const value_map = {
+
+    }
+
+    let cash = portfolio?.dataValues.startingCapital;
+
+    for (let date = startDate; date <= endDate; date.setDate(date.getDate() + 1)) {
+        const todays_orders = orders.filter(order => new Date(order.dataValues.datetime).toISOString().split('T')[0] === new Date(date).toISOString().split('T')[0]);
+
+
+        for (const order of todays_orders) {
+            if (!cache[order.ticker]) {
+                cache[order.ticker] = (await AlphaV.daily_time_series(order.ticker))["Time Series (Daily)"]
+            }
+            if (!cache[order.ticker][date]) {
+                const price_td = await FinnhubUtils.getPrice(order.ticker);
+
+                cache[order.ticker][date] = {
+                    "4. close": price_td
+                }
+            }
+
+            let string_date = new Date(date).toISOString().split('T')[0];
+
+            while (!cache[order.ticker][string_date]) {
+                string_date = new Date(new Date(string_date).setDate(new Date(string_date).getDate() - 1)).toISOString().split('T')[0];
+            }
+
+            const price = cache[order.ticker][string_date]["4. close"];
+
+            if (order.dataValues.type == 'BUY') {
+                cash -= order.dataValues.amount * price;
+                if (!holdings[order.dataValues.ticker]) {
+                    holdings[order.dataValues.ticker] = 0;
+                }
+                holdings[order.dataValues.ticker] += order.dataValues.amount;
+            } else {
+                cash += order.dataValues.amount * price;
+                if (!holdings[order.dataValues.ticker]) {
+                    holdings[order.dataValues.ticker] = 0;
+                }
+                holdings[order.dataValues.ticker] -= order.dataValues.amount;
+            }
+        }
+
+        let value_today = cash;
+
+        for (const [ticker, amt] of Object.entries(holdings)) {
+            let string_date = new Date(date).toISOString().split('T')[0];
+
+            while (!cache[ticker][string_date]) {
+                string_date = new Date(new Date(string_date).setDate(new Date(string_date).getDate() - 1)).toISOString().split('T')[0];
+            }
+
+            value_today += amt * cache[ticker][string_date]["4. close"];
+        }
+
+        value_map[new Date(date).toISOString().split('T')[0]] = value_today;
+
+    }
+
+
+    return value_map;
 }
