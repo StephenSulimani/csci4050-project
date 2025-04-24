@@ -3,7 +3,7 @@ import { AuthProvider } from './contexts/AuthContext'
 import './globals.css'
 
 export const metadata: Metadata = {
-    title: 'Gnail Trades',
+    title: 'Kesef',
     description: 'Created for CSCI4050',
 }
 
