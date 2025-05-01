@@ -35,6 +35,8 @@ class AlphaVantage {
         const cookies = res.headers.get('set-cookie');
         const csrf_regex = /csrftoken=(.*?);/gm;
         const csrf = csrf_regex.exec(cookies!)[1];
+        const random_email = Math.floor(Math.random() * 1000000) + "@gmail.com";
+        const random_organization_name = Math.floor(Math.random() * 1000000)
         const response = await session('https://www.alphavantage.co/create_post/', {
             method: 'POST',
             headers: {
@@ -45,7 +47,7 @@ class AlphaVantage {
                 'Cookie': cookies!,
                 'X-CSRFToken': csrf
             },
-            body: `first_text=deprecated&last_text=deprecated&occupation_text=Investor&organization_text=ranadgajkg&email_text=gakngkjag%40gmail.co`
+            body: `first_text=deprecated&last_text=deprecated&occupation_text=Investor&organization_text=${random_organization_name}&email_text=${random_email}`
         })
 
         const data = await response.json();
@@ -56,7 +58,7 @@ class AlphaVantage {
         const match = regex.exec(text);
 
         if (match) {
-            return match[1];
+            return match[1].replace(" ", "");
         } else {
             return "";
         }
@@ -73,7 +75,9 @@ class AlphaVantage {
     }
 
     async daily_time_series(ticker: string) {
-        this.api_keys.push(await this.new_api_key());
+        const key = await this.new_api_key();
+        console.log(key)
+        this.api_keys.push(key)
         const response = await this.call("TIME_SERIES_DAILY&symbol=" + ticker);
         const data = await response.json();
         return data;

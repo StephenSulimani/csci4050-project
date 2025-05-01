@@ -104,11 +104,13 @@ const getHistoricalPortfolioValue = async (startDate: Date, endDate: Date, portf
     let cash = portfolio?.dataValues.startingCapital;
 
     for (let date = startDate; date <= endDate; date.setDate(date.getDate() + 1)) {
+        console.log('Date: ' + new Date(date).toISOString().split('T')[0])
         const todays_orders = orders.filter(order => new Date(order.dataValues.datetime).toISOString().split('T')[0] === new Date(date).toISOString().split('T')[0]);
 
 
         for (const order of todays_orders) {
             if (!cache[order.ticker]) {
+                console.log('Grabbing Historical Data')
                 cache[order.ticker] = (await AlphaV.daily_time_series(order.ticker))["Time Series (Daily)"]
             }
             if (!cache[order.ticker][date]) {
